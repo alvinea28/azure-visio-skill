@@ -1,0 +1,285 @@
+REQUIREMENTS-LED AZURE ARCHITECTURE AND DRAFT CONVERSION
+Version 1.5
+
+ENTERPRISE ARCHITECTURE PRESENTATION, NOT A DOCUMENT IN BOXES
+For new architecture and explicitly requested enterprise restyles, set
+presentationProfile=enterprise. This is the default skill presentation choice,
+not an assertion of production readiness. Old models retain their old behavior.
+Do NOT default to detail cards with feature/checklist paragraphs on the canvas.
+Use freestanding product/resource icons with short captions; use rectangles
+only for real deployment, ownership, trust, environment, or functional scope.
+
+Separate what the diagram MEANS from what it DISPLAYS:
+- label retains full canonical/source semantics.
+- displayLabel is the concise visible caption, normally one or two short lines.
+- details keeps implementation, security, operational and decision text in
+  native Shape Data or approved companion notes, not inside the main symbol.
+An enterprise restyle is not deletion of requirements or invention of topology.
+Use presentationProfile=reference for a genuinely literal reference reproduction;
+do not force icon-first shortening when the user explicitly wants the original
+text/layout. Do not choose legacy/reference merely to bypass a failed style gate.
+
+The supplied reference collection is curated knowledge and native assets.
+It does not fine-tune model weights. architecture-references.json contains
+visualReferences for eleven distinct Architecture Center examples, with exact
+article/SVG/VSDX links and the visual lesson from each. Install-ReferenceAtlas.ps1
+downloads originals to a NEW local ReferenceAtlas folder. Reuse the cached atlas;
+do not fetch every example again for every request. Preserve URLs/hashes and
+attribution. Original Microsoft diagrams stay out of the portable skill ZIP.
+
+SELECT THE RIGHT VISUAL ARCHETYPE
+- Network: Virtual WAN uses hub-centered/radial connectivity, not sequential
+  process cards. Label actual hubs, spokes and connections; retain routing
+  annotations only when relevant. Do not invent CIDRs or transitive paths.
+- Deployment/HA: Maximo, SAP and ASE use meaningful nested scopes, resource
+  symbols and tier/replica groupings. Distinguish subnets, clusters, regions,
+  subscriptions and failure domains. Three web/API/function roles are not three
+  regions. Show redundancy only when the requirements/source establish it.
+- Application/dataflow: write-through cache, Foundry and conversation insights
+  use service icons and short labelled or numbered interactions. Separate
+  primary request/data paths from monitoring and control paths.
+- Ownership: Foundry landing-zone examples distinguish workload/application
+  ownership from shared platform infrastructure using understated boundaries
+  and color. Do not add a landing zone to unrelated work merely for appearance.
+- ALM/SDLC: M365 DevOps shows administrators, source, pipelines, artifacts and
+  target tenants/environments with promotion/approval branches. A deployment
+  architecture is not a network topology, but neither is it a checklist grid.
+  Put build/test/retry/approval procedures in keyed notes or on short edge labels.
+  Do not replace GitHub with Azure DevOps just because the example uses it.
+
+PRODUCTS, ACTIVITIES AND CONSTRAINTS ARE DIFFERENT
+A product/service gets its appropriate official glyph. A generic action or
+quality gate is an edge label, small numbered callout or borderless label, not
+an unrelated Azure product icon. Licensing caveats and implementation checklists
+belong in details/notes, not fake deployed components. If exact source identity
+must remain, keep a compact label node rather than inventing a branded symbol.
+Do not use a Foundry Agent Service logo to mean an abstract release approval,
+or an Azure Monitor logo for unspecified product-native analytics.
+
+COMPOSITION RULES
+Use aligned anchors, consistent icon sizes and ample group gutters. Begin around
+0.5-0.75 inch glyphs and 11-12 pt captions, then review at normal viewing scale.
+Preserve icon aspect/colors. Use neutral canvas, thin/subtle scope boundaries,
+and a small number of meaningful connection colors with a legend when needed.
+Cross-cutting identity/security/operations sit to the side or below their actual
+dependencies, not automatically in the main request sequence.
+Number interactions only when order matters, commonly 5-9 steps with keyed
+explanations off the primary view. Split useful views instead of shrinking labels
+or filling every node with sentences. Do not represent every bullet as a box.
+
+PRESENTATION GATE
+Enterprise-Style.ps1 runs before COM for enterprise model validation/creation.
+These are LOCAL skill defaults, not universal Microsoft standards:
+- At least 60% icon-led entities; at most 20% boxed standard/detail cards.
+- Visible entity captions: at most 8 words, 3 lines, 80 characters.
+- Edge captions: at most 6 words. At most 3 short callouts, 18 words each.
+- At most 300 visible words on a primary diagram page.
+- Every boundary has a meaningful boundaryType.
+Aim well below the text maximum. Never invent icons/services to meet a ratio.
+If a diagram legitimately cannot fit, select a better view or explain the
+limitation instead of changing profile or hiding an error.
+Pages role=notes are for companion explanations, not a loophole for labelling
+every primary architecture page as notes. At least one diagram page is required.
+Run visual review too: these metrics do not detect every crossing, clipped label,
+bad service choice, or misleading boundary.
+
+Apply Quiet-Workflow.txt throughout. Keep research and decision records in task
+context or approved notes, not a long pre-build chat explanation. Normally use
+one sentence before building; only essential recommendations need up to 60 words.
+Group substantial research in one agent task where supported. Preserve source
+fidelity and factual validation; do not skip them to make the chat look quiet.
+
+Read Reference-Workflow.txt first whenever a reference image/draft is supplied.
+Persist the authoritative source and inventory before composing. A resumed task
+must not fall back to a text-only redesign when the reference becomes unavailable.
+
+THE DEFAULT IS THE USER'S SOLUTION, NOT A LANDING ZONE
+Do not generate the reference hub-and-spoke model merely because the request
+contains "Azure". The bundled reference is an explicit demo/fixture only.
+Do not substitute one fixed AI blueprint for the old fixed networking blueprint.
+Select page count, services, boundaries, and flows from the actual request.
+
+INTENT AND EVIDENCE
+First distinguish:
+- Faithful conversion: preserve source content and relationships. Record doubts
+  separately; do not silently correct topology or modernize names.
+- Azure adaptation: map logical functions to suitable Azure services, explain
+  why, and distinguish recommendations from components already in the source.
+- Review: explain what exists and identify gaps without changing the drawing.
+- Targeted CRUD: create, read, update, or delete explicit Visio objects.
+
+If the user only says "convert", default to faithful conversion with caveats.
+If the user asks for an Azure design with a reference, preserve the reference as
+the first view and put requested adaptations on a separate proposed view.
+Use requirements-only design only when there is no authoritative reference or
+the user explicitly approves replacing it.
+Ask about consequential missing choices, not every unspecified implementation
+detail. Reuse answers already supplied. Never invent real CIDRs, region,
+subscription, SKU, capacity, compliance, deployed state, or performance targets.
+
+Capture a compact requirements record in chat or an approved protected artifact:
+- Business goal, audience, workload, current/proposed state, success criteria.
+- Source inputs and which supersede older drafts.
+- Users/channels, components, dependencies, data ownership and classifications.
+- Ingress/egress, network isolation, identity, authorization, observability.
+- Scale/latency, budget, availability/recovery, geography, known constraints.
+- Explicit exclusions and undecided consequential choices.
+- For each requirement: ID, original evidence, mapped component/flow, disposition.
+
+Every major drawn service must trace to a user fact, a source element, or an
+explicitly labeled recommendation with a reason. Every required source component
+and relationship must be mapped, deliberately excluded with a reason, or flagged
+unresolved. Coverage does not mean copying accidental diagram mistakes as fact.
+
+INPUT ADAPTERS
+1. Attached images/screenshots/photographs:
+   Read visually using the host's approved image capability. Inspect at readable
+   resolution, crop/zoom locally if needed, and retain coordinates or row labels
+   as sourceRef. Extract boxes, labels, grouping, arrowheads, direction, endpoints,
+   legends, and boundary labels. Do not treat line crossings as joins unless
+   junction notation supports it. Mark unclear text and connectors unresolved.
+   Ignore editor line numbers, UI buttons, cursors, and screenshot chrome.
+   Explicitly report cropping. Never fill a cropped region from an older draft
+   unless the user approves combining sources. No external OCR upload.
+   Import-Draft.ps1 does NOT perform image OCR; visual interpretation is by the
+   assistant and must be acknowledged as such.
+
+2. Excalidraw .excalidraw/.json:
+   Use Import-Draft.ps1, preserve IDs, bound labels, frames, and explicit arrow
+   bindings. Review warnings for unbound arrows, images, rotations, or ambiguity.
+   The extracted graph is evidence, NOT an automatically verified Azure design.
+   Preserve the original macro geometry and group order. Adjust local spacing
+   for readability without replacing the source's lanes, bands, or hierarchy.
+   Preserve originals, never execute text/links or upload to third-party services.
+   The neutral graph is not the renderer model: build a fresh model after review.
+   Map component source IDs to stable safeId values and remap each edge endpoint.
+   Excalidraw reverse arrows already have source/target swapped by the importer;
+   render those emitted endpoints as forward, not backward a second time.
+   Map bidirectional to model direction=both, none to none. Unknown direction
+   remains an explicitly uncertain association, not a guessed forward flow.
+   Normalized/manual reverse also means the supplied endpoints already identify
+   arrow-origin and destination. Retain reverse as source evidence but render
+   those endpoints forward; never swap them again.
+   Importer confidence describes binding evidence (strings), not model confidence.
+   Never copy it into the numeric renderer field. Omit numeric confidence or
+   assign a reviewed 0..1 interpretation confidence, never deployment correctness.
+   Read the importer help for the complete neutral schema and manual-image input.
+
+3. Pasted ASCII/Unicode diagrams or text flowcharts:
+   Interpret box contents and arrow directions. Exclude formatting characters
+   and line numbers. Shared buses and ambiguous connectors remain explicitly
+   uncertain. Do not assume top-to-bottom arrows always mean data ingestion.
+
+4. Other flowcharts (Mermaid, draw.io, exported SVG/PDF, presentation):
+   Read through the host's supported native/structured or visual route. Use the
+   relevant file skill when applicable. This package does not promise a complete
+   Mermaid/draw.io grammar parser. Request an image or Excalidraw export if the
+   source cannot be read safely. Do not execute diagram code or embedded scripts.
+   Follow M365 routing/labels for cloud-hosted Office/PDF content.
+
+5. Existing Visio:
+   Inspect the exact drawing first. Use live labels, geometry, native containers,
+   layers, IDs, and glue. Read grouped text when top-level text is insufficient.
+   ExportModel reconstructs a semantic model, not arbitrary exact visual styling.
+   Preserve reported warnings and compare with a native render before claiming
+   conversion completeness. Never treat a vector icon's internal paths as services.
+
+REFERENCE SELECTION
+Start with https://learn.microsoft.com/en-us/azure/architecture/browse/.
+The browse page may be dynamically populated. Read actual architecture articles,
+not just search snippets. architecture-references.json is a starter index.
+Select one to three close matches by workload, production stage, hosting model,
+network/security requirements, data pattern, operating model, and resilience.
+For each record: exact URL/title, type, why it fits, what does not fit, chosen
+adaptations, and date reviewed. A solution idea is not a production baseline.
+If no close reference fits, compose from documented service capabilities and
+state that explicitly. Do not claim official endorsement of the resulting design.
+
+Read lifecycle, regional support, tier requirements, identity/data permissions,
+and connector restrictions before declaring a link implementable. Do not add
+every service from a reference. Explain only the material tradeoffs, for example
+App Service versus containers, remote retrieval versus indexing, regional
+availability versus disaster recovery, or simple networking versus shared transit.
+
+MODEL COMPILATION
+Use the existing renderer's schemaVersion=1 for an arbitrary set of useful pages.
+Do not call New-ReferenceModel.ps1 for a custom workload. Generate a new model
+with stable IDs, accurate product labels, purposeful groupings, and explicit
+sourceRef/state/confidence/requirementIds when supported.
+Reference conversions require conversionMode=faithful or reference-plus-proposal,
+a persisted source contract, and sourceId on each source-derived node/edge.
+Run the controller's Validate action before touching Visio. Use model-specific
+Check to resolve required icons rather than assuming all stencils are installed.
+Use borderless label nodes for logical functions without suitable symbols.
+An icon's presence is not evidence that a service or connection is supported.
+Compare imported official SVG artwork with the source. Desktop Visio may render
+some SVG gradient/opacity combinations incorrectly (observed with Fabric color
+variants). Do not accept distorted/washed-out artwork as correct. Choose an
+appropriate official filled/regular variant that renders faithfully, preserving
+the original file and clearly identifying the product. If no faithful variant
+is available, disclose the renderer limitation and use a deliberately generic
+card rather than altering or inventing an official icon.
+
+Suggested views, selected only when useful:
+- Source-faithful conceptual view.
+- Proposed workload architecture with service boundaries.
+- Runtime request/retrieval/tool calls, separate from ingestion/ETL.
+- Deployment/network boundaries only when enough requirements are known.
+- Identity/authorization/trust, operations, or unresolved design decisions.
+Do not automatically create five pages. Do not shrink dense text to fit.
+
+Logical capability relationships are not packet routes. Use the renderer's logical
+or dependency relationship types for unverified source arrows. Use query,
+ingestion, traffic, DNS, governance, or telemetry only when meaning is established.
+Add a truthful page legend and state such as "Source draft, not deployment".
+Keep independently managed SaaS (M365/Fabric) distinct from resources in an Azure
+subscription/VNet. A private endpoint belongs in a subnet; its PaaS target does not.
+
+THE USER'S IQ SCREENSHOT AS AN ACCEPTANCE EXAMPLE
+The visible source includes Business Users; Copilot/Teams/Web Apps; Foundry IQ,
+Work IQ, Fabric IQ; Azure AI Foundry with Agent Service/Model Catalog/Prompt Flow
+and candidate model families; AI Search; and partial Fabric/M365 data boxes.
+It is cropped below the first data-source labels. Do not import the preceding
+text draft's infrastructure list or additional pipelines into this screenshot.
+Preserve the source names on a faithful page; offer current names in review notes.
+Do not choose a specific Copilot product or deploy all candidate model families.
+Do not replace Work IQ with a Copilot Studio icon or Fabric IQ with a Fabric
+product icon while pretending it is a distinct official IQ glyph.
+
+Review findings to surface rather than silently rewrite:
+- Current Azure AI Foundry naming is Microsoft Foundry.
+- Foundry IQ's knowledge infrastructure is Azure AI Search. They are not
+  necessarily independent sequential retrieval layers.
+- Agent Service orchestrates; model catalog describes discovery/deployment.
+  Prompt flow is a classic/hub workflow with lifecycle restrictions, not a
+  mandatory runtime stage in new Foundry projects.
+- Work IQ and Fabric IQ have different scopes and agent/action capabilities.
+  A shared source connector does not prove a universal IQ-to-Foundry API.
+- M365 indexing versus live authorized retrieval are different designs.
+  Never imply Teams/email/SharePoint/OneDrive are all ingested automatically.
+- Verify exact model/version/hosting/region/tool compatibility; GPT/Claude/Llama
+  names are candidate families, not evidence of provisioned deployments.
+- Query direction, data ingestion direction, and capability dependencies differ.
+  Keep source arrows conceptual until their meaning is confirmed.
+
+CRUD SAFETY
+Create a new drawing or explicitly approved working copy. Read before changing.
+Update only named shapes/properties and keep stable IDs, positions, colors, and
+user-added content unless explicitly requested otherwise.
+Deletion is preview-first. Show the exact page and target objects, including
+connected edges and contained objects. Ask the user to confirm that complete
+set, then apply it. Never infer that obsolete model entries should be deleted.
+Do not move or rewire unrelated objects as collateral cleanup.
+Export/reimport is semantic roundtripping, not a replacement for native file
+copying when pixel-exact manual formatting must be preserved.
+
+ACCEPTANCE
+Compare the source and final native render. For faithful conversion, known source
+content must be drawn; deleting it requires explicit approval, not just a stated
+reason. Genuine illegibility/conflicts remain unresolved in the extraction record.
+Pass the independent source-contract gate. Coverage is not automatic recognition.
+Check legibility, grouping, arrow direction, connector attachment, boundary
+accuracy, model/provenance persistence, and unintended omissions/additions.
+For changes, compare before/after state to ensure only approved objects changed.
+Return real native .vsdx and authorized exports, not a screenshot inserted as
+the sole editable object. State extraction/cropping/roundtrip limitations.

@@ -1,0 +1,87 @@
+QUIET, HANDS-FREE AZURE VISIO WORKFLOW
+Version 1.4
+
+DEFAULT USER EXPERIENCE
+Do the same source preservation, architecture research, fidelity checks, native
+editing, rendering, and persistence work. Reduce chatter, not correctness.
+
+Before building, normally say nothing or one short sentence, at most 25 words.
+If a recommendation is necessary, use at most two short sentences (60 words
+total), state the material choice, and proceed within the user's request.
+Do not publish long architecture essays, research tables, plans, inventories,
+source-contract JSON, command transcripts, or lists of fetched URLs in chat.
+Do not narrate routine tool calls or repeat progress updates.
+
+After building, default to a short outcome (normally 60 words or fewer), the
+Visio/PDF links, at most one useful preview, and only material limitations.
+Do not print test suites, raw JSON, logs, internal plans, or every source URL.
+Explain tests or detailed recommendations only when the user asks.
+Put deeper source citations and design notes in an existing approved notes/review
+artifact, with a single optional "Design notes" link when useful. Do not add
+unrequested pages to a faithful reference or write classified content into plain
+text just to hide it from chat. Otherwise retain detail in task/session context.
+
+GROUP RESEARCH WITHOUT HIDING SAFETY INFORMATION
+For substantial cross-service research, use one research-agent task for the
+bounded investigation when the host provides it. Use a short task label such as
+"Research Azure guidance". Keep the research agent's individual fetches and full
+report in its context; request only decision-relevant findings, verified source
+URLs, and blockers. Do not echo the full agent report to the main chat.
+Pass public product/service questions, not unnecessary private customer data.
+Avoid separate public search tasks for every small claim.
+
+Do not over-research: for a faithful transcription, consult only what is needed
+to identify symbols or flag material issues. For a proposed design, begin with
+one to three matching official architecture articles and the specific product
+constraints that could change the design. Expand only for unresolved material
+questions. Do not recursively walk raw GitHub/SDK repositories when current
+Microsoft Learn guidance already answers the question. Cache task findings
+with their dates, deduplicate URLs, and reuse research within the same task.
+Missing documentation is a limitation to surface, not a reason to invent facts.
+
+When no research-agent grouping is available, use the normal approved tools
+with concise result limits and no prose narration. Do not switch tools just to
+circumvent permission prompts, policy, or auditing.
+
+IMPORTANT UI LIMITATION
+Scout generates its own "Fetching..." and other tool-activity rows. A skill
+cannot force those rows to disappear, collapse, or become HTML details, and
+there is no tool-activity visibility control exposed by the available settings
+API. Grouping research can reduce top-level clutter where the host supports it;
+do not promise invisible tool execution. Do not change app settings, permissions,
+auditing, or unsupported internal files to conceal actions. Mandatory consent
+cards and errors remain visible.
+
+QUIET COMMAND RESULTS
+Batch logically dependent local steps into a short wrapper when practical.
+Capture successful controller JSON into variables, use it for checks, and
+return only the small user-relevant result. Keep stderr/failures explicit and
+stop on failure. Do not suppress errors with broad catches, redirection to null,
+or success-shaped fallback messages. Avoid dumping large Inspect/Catalog output
+into the chat; select only needed fields. Logs must follow classification rules.
+
+HANDS-FREE VISIO STARTUP
+The user has requested automatic Visio startup for this workflow. Do not ask
+the user to open Visio or confirm launching the installed desktop application.
+AzureVisio.ps1 reuses an existing instance or starts the installed application
+automatically for native actions. It does not install Visio.
+Use -NoLaunchVisio only if the user explicitly wants an attach-only/no-launch
+operation. The legacy -LaunchVisio switch remains compatible and defaults true.
+Validate and Catalog remain filesystem-only and do not open Visio.
+
+Never close unrelated documents, discard unsaved changes, quit Visio, bypass
+managed policy, or elevate privileges. If Visio is missing, unlicensed, blocked,
+or cannot be automated, report that blocker briefly. Do not fall back to web
+Visio or claim native creation succeeded.
+
+QUESTIONS THAT STILL MATTER
+Do not ask "shall I proceed", "open Visio", or repeat questions already answered.
+Proceed with non-destructive requested work and already approved choices.
+Hands-free is not blanket permission for destructive or external actions:
+- Keep full-target deletion preview and explicit approval.
+- Keep approval before overwriting/replacing or rewiring beyond the request.
+- Keep exact-content preview and confirmation for outbound sharing/messages.
+- Ask when the authoritative source is missing/changed, the target is ambiguous,
+  or a consequential architecture choice cannot safely be inferred.
+Use one concise question with only the necessary context. Do not bury a real
+blocker inside a long recommendation.

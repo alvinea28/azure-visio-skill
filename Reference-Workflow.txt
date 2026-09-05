@@ -1,0 +1,155 @@
+REFERENCE PRESERVATION AND RESUMABLE CONVERSION
+Version 1.5
+
+Apply Quiet-Workflow.txt: keep extraction inventories/contracts and routine
+research out of the main chat. Do the checks in task context, while surfacing
+real blockers briefly. Installed desktop Visio starts automatically.
+
+PRESENTATION AND SEMANTIC FIDELITY ARE SEPARATE
+Read the enterprise-presentation section of Architecture-Guide.txt. A user asking
+for fewer boxes/text and Architecture Center styling has authorized a presentation
+restyle, not removal of requirements or arbitrary topology changes.
+For enterprise restyle, keep canonical label/sourceId/details while using a short
+displayLabel and native icon. Full detail stays in Shape Data or approved notes;
+it need not be printed inside every node. Source fidelity checks canonical
+semantics; the separate Enterprise-Style gate checks the visible presentation.
+For a literal reproduction request, retain the reference profile and source text.
+Do not silently abbreviate a literal reference or copy the topology/services of a
+style reference. The user's list of Architecture Center examples is a style atlas.
+
+WHY THIS EXISTS
+A conversion can be valid Visio yet fail the user's request. One observed failure
+lost the reference image after resuming, proceeded from text requirements alone,
+and delivered a redesigned architecture in place of the promised reference view.
+Checking that shapes are editable or a model validates does not catch this.
+
+SOURCE ROLES
+Identify each attachment before drawing:
+- Authoritative reference: the source to preserve.
+- Requirements: requested additions or constraints.
+- Rejected/comparison output: evidence of what went wrong, NOT a new source.
+- Style-only reference: only if the user explicitly asks to borrow appearance,
+  not its components or architecture.
+Keep these roles in the task's persisted source record. Do not infer that a
+later attachment replaces an earlier source when the user calls it failed output.
+
+DEFAULT FOR MIXED REQUESTS
+"Convert this reference and produce a best-practice draft" means two deliverables:
+1. A first, source-faithful reference view preserving content and macro layout.
+2. A separately named proposed view, only if requested, with documented changes.
+It does NOT authorize silently replacing the reference, renaming its services,
+dropping layers, or introducing custom adapters into the reference view.
+Present the reference preview first. Do not label a proposal as the conversion.
+If the user explicitly wants only a redesign, record that decision and use
+new-design mode; do not silently switch modes after a resumed conversation.
+
+PERSIST THE SOURCE BEFORE COMPOSITION
+Resolve attachments through the host's approved file/workspace tools. For local
+unclassified references, copy the exact original bytes into a new approved task
+folder, for example Sources\Designer.jpeg. Preserve the comparison separately.
+Do not overwrite source files. Use protected storage for classified material;
+never export it into unprotected JSON or images merely to satisfy this workflow.
+
+Keep a source contract beside the proposed model containing the preserved source
+path and SHA256, its authoritative-reference role, the source page, the extracted
+component/relationship inventory, grouping, important details, and layout order.
+The contract must be extracted from the actual source BEFORE constructing the
+render model. Never derive the expected inventory from the finished model, from
+the rejected output, or from the model's omissions. Never relax the contract or
+mark missing content as an approved deletion merely to make validation pass.
+
+Do not require users to approve every obvious transcription. Surface the compact
+inventory and consequential ambiguities; ask when source meaning is genuinely
+unclear. Source conflicts can remain explicitly noted without blocking faithful
+transcription. Architecture corrections are a separate design decision.
+
+RESUME RULE: FAIL CLOSED, NOT REQUIREMENTS-ONLY
+On every resumed task, read the persisted source record and check the actual
+source file. If the source cannot be accessed or its hash changed, STOP the
+reference conversion. Ask the user to reattach/locate it, or explicitly approve
+a new requirements-only design. Do not claim the source is unavailable without
+trying the known original and persisted locations. Do not reinterpret "what now"
+as approval of previously proposed design changes or a substitute architecture.
+Permission to generate a diagram is not permission to discard the reference.
+
+SOURCE CONTRACT AND HARD GATE
+Reference-Fidelity.ps1 reads an independent source contract and a renderer model.
+Run it with -ReferencePath <contract.json> -ModelPath <model.json>.
+Default behavior throws on failure. -ReportOnly returns valid:false with specific
+violations for diagnostics, NOT a license to render/deliver a failed conversion.
+Read the helper's contract documentation before generating the source JSON.
+The contract requires mode="source-faithful", independently of the model's
+conversionMode, and requiredText contains complete logical lines, including
+list prefixes. Case and whitespace normalize; content is not paraphrased.
+Nonempty unresolved means extraction is still uncertain and blocks acceptance.
+Clearly observed contradictions in the original architecture can be recorded
+as review notes while faithfully transcribing both source statements; that is
+different from unresolved/illegible source extraction. Never clear uncertainty
+solely to bypass the gate.
+
+Use model conversionMode=faithful or reference-plus-proposal and supply
+referenceContract (relative to the model folder) or controller -ReferencePath.
+AzureVisio.ps1 runs the gate before COM in Validate/New/Merge/model-specific Check.
+Both reference modes refuse to proceed without a contract. Old source-free models
+remain supported for compatibility and deliberately new designs.
+The controller also saves the contract pointer and conversion mode in native
+document Shape Data. Inspect and ExportModel return them, so a resumed task can
+recover the source context. Moving/sharing a task requires an authorized source
+copy and an explicitly corrected contract path, not bypassing the source check.
+
+The designated reference page must preserve each sourceId exactly once. Keep
+service titles and required functional detail, container membership, connectors
+and directions. No unaccounted extra components/edges on that page. Preserve
+required left-to-right/top-to-bottom order and page aspect ratio. Extra proposal
+or review pages require allowAdditionalPages in the contract.
+
+An automated contract cannot prove that the assistant read an image correctly.
+It prevents known drift after extraction. The assistant must still compare the
+actual source and rendered Visio visually. Do not claim arbitrary pixel-perfect
+conversion, OCR accuracy, or architectural correctness from a passing gate.
+
+VISUAL COMPOSITION
+Record the source's macro layout: column/lane order, top/bottom bands, shared
+service strips, whitespace, title/body hierarchy, and connector directions.
+Reproduce that structure, not a generic cloud boundary with loosely related cards.
+Do not replace a cross-cutting governance strip with a paragraph elsewhere.
+Keep explicit feature lists, vendor names, annotations, numbered flows, and legends.
+Normalize line wrapping and use official current product artwork without silently
+renaming the source's labels. Do not imitate third-party logos or invented icons.
+
+For enterprise restyles, use cardStyle=icon and concise captions under the glyph,
+or cardStyle=label for a generic unbranded function. Do not make every entity a
+large text card. Detail/standard cards remain available for literal source
+reproduction, companion notes, or specifically justified compact exceptions.
+Use source colors on meaningful boundaries/connectors, never the product glyph.
+Use sourcePosition/targetPosition (0..1 along the selected side) to keep separate
+request/response connectors from occupying the same midpoint or overlapping text.
+Do not hide clipping by shrinking the entire diagram. Allocate readable card
+width/height; move only what preserves the source's relative organization.
+Use readable body sizes appropriate to the page rather than leaving tiny text
+inside oversized boxes. Page titleFontSize and container fontSize can preserve
+heading hierarchy without altering product artwork.
+
+CONTENT AND VISUAL ACCEPTANCE
+Before delivery:
+- Persist and verify the original source.
+- Pass the source-contract gate on the intended reference model.
+- Render through desktop Visio and open the exported page image.
+- Compare source and output side by side: components, details, lane order,
+  group membership, arrows, legends, call flow, and annotations.
+- Confirm no unapproved custom adapters/services or inferred connections.
+- Inspect native text/glue and saved state; do not use a full-page pasted image.
+- If a source arrow conflicts with narrative flow, preserve it and explain the
+  conflict separately rather than fixing one silently.
+- Show the source-faithful preview as the conversion. Link a proposal separately.
+
+REGRESSION CASE
+The Designer call-center reference has four horizontal layers (Telephony,
+Voice & AI, Business Process, Enterprise Data), a bottom cross-cutting governance
+strip, ACS, Azure Speech, Foundry Agent Service, Content Safety, Copilot Studio,
+Power Automate/Logic Apps, knowledge, enterprise systems, storage, and a numbered
+call flow. A generic cloud-boundary drawing with media/workflow adapters is not
+the faithful reference, even if it could be a plausible separately proposed design.
+The reusable synthetic tests exercise omissions, extras, changed directions,
+lost source/hash mismatch, wrong source role, hierarchy drift, and layout changes.
+Actual user reference files and task contracts must stay out of the shared ZIP.

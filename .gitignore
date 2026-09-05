@@ -1,0 +1,27 @@
+# Local configuration and credentials
+environment.json
+.env
+.env.*
+!.env.example
+.scout/
+.copilot/
+
+# Downloaded libraries and private working artifacts
+IconLibrary/
+ReferenceAtlas/
+ProjectIconLibraries/
+Outputs/
+Sources/
+*.vsdx
+*.vstx
+*.pdf
+*.native.model.json
+*.reference.json
+*.log
+*.tmp
+~$*
+
+# Only the curated distributable belongs in source control
+*.zip
+!dist/
+!dist/*.zip
