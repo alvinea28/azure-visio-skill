@@ -2,26 +2,31 @@
 .SYNOPSIS
 Checks local presentation guardrails, not architecture correctness or Microsoft certification.
 .DESCRIPTION
-Requires a schemaVersion=1 model with presentationProfile=enterprise. Diagram
-pages (role omitted or diagram) use icon-led cards and short captions. Notes
-pages (role=notes) may hold detailed explanations. These thresholds are local
+Requires a schemaVersion=1 enterprise model or an enterprise/reference v1.6 pack.
+Diagram pages use icon-led cards and short captions. Only contract-designated
+notes pages may hold detailed explanations. These thresholds are local
 skill defaults, not measured Microsoft standards.
 Full canonical label/details are retained as semantic data; only the visible
 caption is counted for icon/label styles. No source content is read or changed.
 #>
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName='File')]
 param(
-    [Parameter(Mandatory)][string]$ModelPath,
+    [Parameter(Mandatory,ParameterSetName='File')][string]$ModelPath,
+    [Parameter(Mandatory,ParameterSetName='Object')][pscustomobject]$InputModel,
     [switch]$ReportOnly
 )
 Set-StrictMode -Version 2
 $ErrorActionPreference='Stop'
-if($ModelPath -notmatch '^[A-Za-z]:\\' -or [IO.Path]::GetExtension($ModelPath) -ine '.json'){
-    throw 'Use an absolute local JSON ModelPath.'
+if ($PSCmdlet.ParameterSetName -eq 'File') {
+    if($ModelPath -notmatch '^[A-Za-z]:\\' -or [IO.Path]::GetExtension($ModelPath) -ine '.json'){
+        throw 'Use an absolute local JSON ModelPath.'
+    }
+    $file=Get-Item -LiteralPath $ModelPath
+    if($file.Length -gt 10MB){throw 'Style input exceeds 10 MB.'}
+    $model=Get-Content -LiteralPath $ModelPath -Raw | ConvertFrom-Json
+} else {
+    $model=$InputModel
 }
-$file=Get-Item -LiteralPath $ModelPath
-if($file.Length -gt 10MB){throw 'Style input exceeds 10 MB.'}
-$model=Get-Content -LiteralPath $ModelPath -Raw | ConvertFrom-Json
 $errors=[Collections.Generic.List[object]]::new()
 $metrics=[Collections.Generic.List[object]]::new()
 function Value($Object,[string]$Name,$Default=$null){
@@ -50,8 +55,24 @@ function Caption($Node){
     }
     return [string](Value $Node 'label' '')
 }
-if((Value $model 'schemaVersion') -ne 1 -or (Value $model 'presentationProfile') -cne 'enterprise'){
-    throw 'Style audit requires schemaVersion=1 and presentationProfile=enterprise.'
+$hasContract=$null -ne $model.PSObject.Properties['outputContract']
+if((Value $model 'schemaVersion') -ne 1 -or
+    ((Value $model 'presentationProfile') -cne 'enterprise' -and -not ($hasContract -and (Value $model 'presentationProfile') -ceq 'reference'))){
+    throw 'Style audit requires schemaVersion=1 and presentationProfile=enterprise (or reference with outputContract).'
+}
+if ($hasContract) {
+    if (-not (Get-Command Confirm-ArchitecturePack -ErrorAction SilentlyContinue)) {
+        $tokens=$null; $parseErrors=$null
+        $controller=[Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot 'AzureVisio.ps1'),[ref]$tokens,[ref]$parseErrors)
+        if ($parseErrors.Count) { throw 'Cannot load architecture pack validator.' }
+        foreach ($function in $controller.FindAll({
+            param($node)
+            $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -in @(
+                'Get-Value','Test-Field','Confirm-Number','Confirm-Fields','Confirm-Metadata','Confirm-ArchitecturePack')
+        },$true)) { . ([scriptblock]::Create($function.Extent.Text)) }
+    }
+    try { Confirm-ArchitecturePack $model -Required }
+    catch { Issue 'ArchitecturePack' '' '' $_.Exception.Message }
 }
 $pages=Value $model 'pages'
 if($pages -isnot [array] -or $pages.Count -eq 0){throw 'Style model requires pages.'}
@@ -62,7 +83,10 @@ foreach($page in $pages){
     $name=[string](Value $page 'name' '')
     $role=Value $page 'role' 'diagram'
     if($role -notin @('diagram','notes')){Issue 'PageRole' $name '' 'Page role must be diagram or notes.';continue}
-    if($role -eq 'notes'){continue}
+    if($role -eq 'notes'){
+        if(-not $hasContract){Issue 'NotesContract' $name '' 'Notes-page exemptions require the architecture-pack-v1.6 output contract.'}
+        continue
+    }
     $diagramCount++
     $nodes=Value $page 'nodes';$edges=Value $page 'edges'
     if($nodes -isnot [array] -or $edges -isnot [array]){throw 'Each diagram requires nodes and edges arrays.'}
@@ -126,7 +150,9 @@ foreach($page in $pages){
 }
 if($diagramCount -eq 0){Issue 'MissingDiagram' '' '' 'An enterprise model must contain a diagram page, not only notes.'}
 $report=[pscustomobject]@{
-    valid=($errors.Count -eq 0);profile='enterprise';metrics=@($metrics.ToArray());errors=@($errors.ToArray())
+    valid=($errors.Count -eq 0);profile=(Value $model 'presentationProfile');metrics=@($metrics.ToArray());errors=@($errors.ToArray())
+    routingPolicy='orthogonal-v1.6'
+    routingNote='New normalizes authored straight routes to orthogonal routing, retaining declared endpoints and ports. Icon bottom ports attach below the fitted caption; other icon ports touch the glyph. Native Inspect reports attachment regions and checks actual strokes against every service caption, including endpoint captions.'
     note='Local presentation guardrails only; visual review and architecture validation remain required.'
 }
 $report | ConvertTo-Json -Depth 6

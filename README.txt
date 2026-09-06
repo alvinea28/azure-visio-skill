@@ -1,12 +1,31 @@
-AZURE VISIO SKILL 1.5
+AZURE VISIO SKILL 1.6
 
-One reusable architecture skill, with two execution modes:
+One reusable architecture skill, with two direct output modes:
 - Microsoft Scout on Windows: native editable desktop Visio creation and editing.
-- Microsoft Copilot Cowork: architecture design, review of supplied information,
-  and a specification for an explicit handoff to Scout. Uploading this skill
-  does NOT give Cowork local PowerShell or Visio COM access.
+- Microsoft Copilot Cowork with permitted Python execution: directly generates
+  editable .vsdx and .pdf files inside the task using portable_visio.py.
+  No Scout bridge, handoff, desktop Visio, Windows, or COM is needed for that
+  creation path. A skill cannot grant a host missing execution/download rights.
 
 WHAT CHANGED
+Each newly authored drawing now has exactly three pages:
+1. The requested main architecture.
+2. A separately proposed hardened architecture when applicable and not already
+   present or required; otherwise a substantive hardening applicability review.
+3. A text-rich connected flowchart and descriptive write-up of page 1.
+Both the editable Visio file and matching three-page PDF are real deliverables.
+The final page traces every main service/function and relationship, rather than
+describing the proposed alternative. Hardening reviews are not certifications.
+The output contract is validated and retained in native Shape Data.
+Connections use horizontal/vertical segments and right-angle bends, never
+diagonal shortcuts. Endpoints attach to the intended services and return/control
+paths use clear gutters instead of crossing unrelated icons or captions.
+
+Cowork now has a cross-platform direct-file renderer instead of a Scout handoff.
+Intermediate model JSON, scripts, notes and previews are not final deliverables.
+Unavailable Python, dependencies, icons, source rights, or downloadable output
+must be reported as blockers, never replaced with a success-shaped handoff.
+
 Enterprise architecture now defaults to freestanding service icons, short
 captions and meaningful boundaries, not paragraph-filled process cards.
 Full requirements and implementation detail remain in native Shape Data.
@@ -31,13 +50,13 @@ source contract. Missing/changed sources, dropped components/detail, added
 adapters, altered grouping, or reordered layers fail the fidelity gate.
 Reference-plus-proposal requests preserve the reference as the first view;
 proposed changes are separate. See Reference-Workflow.txt.
-Detail cards add native bold headings, left/top-aligned text and upper-left
-official icons; configurable connector attachment positions separate flows.
+Detail cards on the final flowchart add native bold headings and left/top body
+alignment; configurable connector attachment positions separate flows.
 
 Start from the user's requirements or draft, not a fixed hub-and-spoke template.
 Read Architecture-Guide.txt for source extraction, reference selection, coverage,
-Azure adaptation, and safe CRUD. Custom workloads use custom models and only
-the pages they need. The generic hub-and-spoke reference is an opt-in demo.
+Azure adaptation, and safe CRUD. Custom workloads use custom three-page packs.
+The generic hub-and-spoke reference is an opt-in legacy demo, not the default.
 
 Attach a readable image, Excalidraw file, or flowchart, or paste a text diagram.
 The assistant visually interprets images/text; Import-Draft.ps1 extracts
@@ -46,9 +65,13 @@ or universal Mermaid/draw.io parser in this package. Cropped/ambiguous input
 must be flagged, not filled in from unrelated earlier drafts.
 
 REQUIREMENTS
-Use an interactive Windows desktop session, Windows PowerShell 5.1
+For Scout's desktop path, use an interactive Windows session, PowerShell 5.1
 (powershell.exe), licensed desktop Visio with its native container stencil,
 and permitted local shell/file access in Scout. Visio for the web is not enough.
+For Cowork's direct creation path, use its permitted Python execution and file
+download tools, the bundled requirements-portable.txt libraries, and an official
+icon catalog. The Python renderer creates new documents; it is not a desktop
+automation bridge or an arbitrary existing-Visio editing/conversion engine.
 Each product's licensing, rollout, admin controls, and enterprise policies apply.
 Do not deploy this controller as an unattended service.
 
@@ -67,11 +90,46 @@ The skill's reported resource directory is authoritative. Keep all companion
 files together there. The controller uses relative asset lookup, not author paths.
 
 INSTALL IN MICROSOFT COPILOT COWORK
-Customize > Skills > Add dropdown > Upload skill, then select the skill ZIP.
+Open Customize from the sidebar or + menu, where available, then
+Skills > Add dropdown > Upload skill and select the v1.6 skill ZIP.
 Its root must contain SKILL.md, not another enclosing azure-visio directory.
 The upload is stored in OneDrive and subject to your organization's policies.
 Only upload the clean distribution ZIP, not your customer drawings or your
 environment.json. Import availability is not proof of local execution access.
+Start a new task after replacing an older skill:
+"Use azure-visio to create the requested architecture. Deliver the actual
+editable Visio file and PDF directly in this task, each with the three v1.6
+pages. Run the portable renderer here; do not create a Scout handoff."
+If skill upload or Python execution is absent, ask the administrator about the
+supported rollout; do not bypass policy or claim files were created.
+
+DIRECT PYTHON CREATION (SCOUT OR COWORK)
+Resolve the extracted skill directory first. These commands use relative script
+names from that directory; replace the example input/output paths with actual
+permitted locations in the current execution environment:
+python -B portable_visio.py capabilities
+python -B portable_visio.py render --model model.json --icon-directory IconLibrary --output-directory new-output --name architecture --bundle
+
+Python 3.10+, ReportLab, resvg-py and Pillow are required. If missing and permitted:
+python -m pip install -r requirements-portable.txt
+
+Use an existing approved official catalog, or the install-icons command after
+reviewing its --help and the Microsoft icon terms. Network access is not needed
+when the catalog and its artwork are already local. The render destination must
+be new. --bundle adds a ZIP containing the actual standalone VSDX and PDF for
+hosts that expose ZIP downloads but cannot preview VSDX.
+
+The PDF is generated from the same model, not exported through desktop Visio.
+Service artwork is preserved as PNG within editable native groups; captions,
+shapes, metadata and glued connectors remain editable. Boundaries preserve
+semantic ParentId hierarchy but are not native Visio containers. Native model
+export reports this distinction rather than fabricating container membership.
+Visible text is limited to Windows-1252; other scripts/fonts fail explicitly.
+Impossible connector routes fail rather than falling back to diagonal shortcuts.
+Arbitrary later geometry edits may require rerouting to retain obstacle clearance.
+Reference conversion verifies the actual source before output creation; static
+package inspection alone does not revalidate source fidelity. Actual execution
+inside each Cowork tenant depends on its permitted capabilities.
 
 FIRST RUN IN SCOUT
 Invoke directly; installed desktop Visio opens automatically if needed:
@@ -109,7 +167,7 @@ The following explicitly creates the old demo. Do NOT use it for custom workload
 In Windows PowerShell, from the skill folder:
 $output = Join-Path $env:LOCALAPPDATA ('AzureVisio\Example-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $output | Out-Null
-.\AzureVisio.ps1 -Action New -ModelPath (Join-Path $PWD 'hub-spoke-reference.json') -DocumentPath (Join-Path $output 'Hub-Spoke.vsdx') -OutputDirectory (Join-Path $output 'Exports')
+.\AzureVisio.ps1 -Action New -LegacyModel -ModelPath (Join-Path $PWD 'hub-spoke-reference.json') -DocumentPath (Join-Path $output 'Hub-Spoke.vsdx') -OutputDirectory (Join-Path $output 'Exports')
 
 Use a user-approved output destination for real projects. New never overwrites
 an existing drawing. For a reusable template:
@@ -177,19 +235,28 @@ Legacy builtin icon keys still use the recipient's installed stencils.
 Use a model-specific Check to verify only assets required by that model.
 Generate native drawing templates locally.
 
-COWORK HANDOFF
-In Cowork, ask:
-"Use azure-visio to interpret this draft and propose an Azure architecture
-based on my requirements and the closest Architecture Center references.
-Keep source facts, assumptions, and proposed changes separate. Produce a
-Scout handoff. Do not claim to control my local Visio."
+COWORK DIRECT FILE CREATION
+Run portable_visio.py using the code-execution tool actually exposed by the host.
+Resolve scripts beside SKILL.md, use the environment's actual output path, and
+return that host's downloadable .vsdx and .pdf artifact links. Never invent a
+tool name or reference a user's PC path from a remote execution environment.
+The portable renderer writes an editable Visio package and matching PDF from
+one model without calling desktop Visio. It does not replace existing files.
 
-Then in Scout:
-"Use azure-visio with this handoff. Check local prerequisites and create a
-new native Visio drawing in my approved destination."
+Install requirements-portable.txt through the permitted package mechanism when
+the declared libraries are missing. Use portable_visio.py --help for its exact
+validation, icon-installation, and rendering commands. The portable icon path
+uses catalog iconRef values, not installed Windows stencil master names.
+Keep intermediate JSON/scripts internal unless the user asks for them.
 
-No automatic Cowork-to-Scout bridge, MCP server, public endpoint, or unattended
-desktop runner is included. Classified data must remain in approved locations;
+Completion means both actual files exist, are nonempty, have three pages in
+the required order, and the flowchart describes the main architecture. A PNG
+preview or renamed file extension is not a Visio document. If code execution,
+library installation, source/icon access, or output download is unavailable,
+state that exact blocker without producing a Scout handoff as a substitute.
+
+No Cowork-to-Scout bridge, public endpoint, or unattended desktop runner is
+included. Classified data must remain in approved locations;
 do not emit confidential requirements into unprotected JSON or image exports.
 Sharing or publishing still requires explicit approval.
 
@@ -212,11 +279,18 @@ icon-sources.json: official source/download URLs and collection freshness.
 New-ReferenceModel.ps1: generates the generic two- or three-spoke model.
 hub-spoke-reference.json: generic illustrative reference, no tenant data.
 environment.example.json: empty optional local mapping.
-Test-AzureVisio.ps1: existing integration exercise plus portability checks.
+portable_visio.py: direct editable Visio/PDF generation in a Python environment.
+portable_reference.py: portable source-contract fidelity gate for conversions.
+requirements-portable.txt: declared dependencies for direct portable rendering.
+Developer tests remain in the source repository, not the small runtime ZIP:
+Test-AzureVisio.ps1, Draft-Import.Tests.ps1, Reference-Fidelity.Tests.ps1, and
+test_portable_visio.py and test_portable_reference.py. This reserves the companion-file budget
+for runtime code and guides.
 Build-AzureVisioPackage.ps1: allow-listed packaging, excludes environment.json.
 README.txt: these installation, compatibility, and use instructions.
 
 MAINTAINER VALIDATION
+Use the full source repository for developer tests; runtime ZIPs omit them.
 Run Test-AzureVisio.ps1 -PortableOnly -OutputDirectory <new absolute folder>
 for filesystem/path checks without Visio.
 Use -CrudOnly for the new native update/delete/read-model exercise.
@@ -237,6 +311,8 @@ PUBLIC PRODUCT DOCUMENTATION
 https://learn.microsoft.com/en-us/microsoft-scout/use-microsoft-scout
 https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-customize
 https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-faq
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-plugin-development
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/use-cowork
 https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-local-browser
 https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-plugin-development
 

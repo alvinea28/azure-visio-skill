@@ -1,5 +1,41 @@
 REQUIREMENTS-LED AZURE ARCHITECTURE AND DRAFT CONVERSION
-Version 1.5
+Version 1.6
+
+THREE-PAGE ARCHITECTURE PACK
+Every newly authored drawing has exactly three ordered pages and two actual
+deliverables: editable .vsdx plus matching .pdf. Set
+outputContract=architecture-pack-v1.6, retaining schemaVersion=1.
+
+1. Main architecture: preserve the user's requested requirements and source.
+2. Enterprise hardening: a separately labeled PROPOSED architecture only when
+   applicable and neither already present nor required by the user. Otherwise
+   use a substantive hardening review explaining existing/required controls or
+   why hardening is not applicable. Do not invent a duplicate alternative.
+3. Main flow and explanation: a native connected flowchart with descriptive
+   process cards AND visible explanatory prose about page 1, never page 2.
+
+hardening.status is proposed, already-enterprise, or not-applicable; reason is
+nonempty and evidence-based. pages[].view is main, hardening, flowchart in order.
+The main and proposed architecture have role=diagram. A hardening review and
+the text-rich flowchart have role=notes. This deliberate separation preserves
+icon-first architecture while giving the final page the requested depth.
+
+Every flowchart card carries mainNodeIds and mainEdgeIds arrays referring only
+to page 1; together cover all main cards and edges. Use at least two connected
+cards with ten or more visible words each and a narrative note of forty or
+more words. Aim for 300-500 readable words over the whole final page, covering
+responsibilities, flow, assumptions, and actual failure behavior. More text
+must remain readable, not become tiny text. Use branches only where warranted.
+Review pages have at least forty visible words and make no certification claim.
+
+Do not automatically repaginate or add controls to existing drawings during
+targeted CRUD. Legacy creation requires an explicit compatibility choice;
+never use legacy mode merely to evade the new deliverable contract.
+
+Cowork runs portable_visio.py inside its own permitted Python environment to
+produce both files directly. Do not output a Scout handoff or intermediate
+JSON/scripts instead of finished files. If execution/download is unavailable,
+report the precise host limitation, not fabricated completion.
 
 ENTERPRISE ARCHITECTURE PRESENTATION, NOT A DOCUMENT IN BOXES
 For new architecture and explicitly requested enterprise restyles, set
@@ -14,7 +50,9 @@ Separate what the diagram MEANS from what it DISPLAYS:
 - displayLabel is the concise visible caption, normally one or two short lines.
 - details keeps implementation, security, operational and decision text in
   native Shape Data or approved companion notes, not inside the main symbol.
-An enterprise restyle is not deletion of requirements or invention of topology.
+These icon-first rules apply to architecture pages, not the deliberately
+text-rich flowchart on page 3. An enterprise restyle is not deletion of
+requirements or invention of topology.
 Use presentationProfile=reference for a genuinely literal reference reproduction;
 do not force icon-first shortening when the user explicitly wants the original
 text/layout. Do not choose legacy/reference merely to bypass a failed style gate.
@@ -65,7 +103,23 @@ Cross-cutting identity/security/operations sit to the side or below their actual
 dependencies, not automatically in the main request sequence.
 Number interactions only when order matters, commonly 5-9 steps with keyed
 explanations off the primary view. Split useful views instead of shrinking labels
-or filling every node with sentences. Do not represent every bullet as a box.
+or filling every architecture node with sentences. Reserve detailed flowchart
+cards for the final page, and keep the three-page pack order.
+
+CONNECTORS: RIGHT ANGLES AND REAL ENDPOINTS
+Use routeStyle=orthogonal for every authored connection. Every visible segment
+must be horizontal or vertical; never use diagonal shortcuts or floating arrows.
+Choose sourceSide/targetSide and normalized positions to reach the actual service
+glyph or generic caption, with native glue to its semantic shape. Scope links
+must terminate on the explicitly intended boundary, not a nearby service.
+Reserve clear gutters for return, configuration, identity and telemetry paths.
+Do not route through unrelated glyphs or captions, combine different relationships
+into a misleading shared trunk, or mistake an unjoined crossing for a service hop.
+Preserve relationship endpoints and direction when changing line presentation.
+Check actual segment coordinates and source/target glue after rendering, not only
+the routeStyle value. Review the Visio and PDF at readable scale before delivery.
+Existing literal references are not silently rewired. An explicitly requested
+right-angle restyle changes routing only, not source topology or service meaning.
 
 PRESENTATION GATE
 Enterprise-Style.ps1 runs before COM for enterprise model validation/creation.
@@ -97,7 +151,8 @@ THE DEFAULT IS THE USER'S SOLUTION, NOT A LANDING ZONE
 Do not generate the reference hub-and-spoke model merely because the request
 contains "Azure". The bundled reference is an explicit demo/fixture only.
 Do not substitute one fixed AI blueprint for the old fixed networking blueprint.
-Select page count, services, boundaries, and flows from the actual request.
+Select services, boundaries, and flows from the actual request. New v1.6
+deliverables always use the three-page architecture pack.
 
 INTENT AND EVIDENCE
 First distinguish:
@@ -202,7 +257,7 @@ App Service versus containers, remote retrieval versus indexing, regional
 availability versus disaster recovery, or simple networking versus shared transit.
 
 MODEL COMPILATION
-Use the existing renderer's schemaVersion=1 for an arbitrary set of useful pages.
+Use the existing renderer's schemaVersion=1 with the three-page output contract.
 Do not call New-ReferenceModel.ps1 for a custom workload. Generate a new model
 with stable IDs, accurate product labels, purposeful groupings, and explicit
 sourceRef/state/confidence/requirementIds when supported.

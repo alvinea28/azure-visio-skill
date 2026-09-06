@@ -1,5 +1,5 @@
 QUIET, HANDS-FREE AZURE VISIO WORKFLOW
-Version 1.4
+Version 1.6
 
 DEFAULT USER EXPERIENCE
 Do the same source preservation, architecture research, fidelity checks, native
@@ -14,11 +14,15 @@ Do not narrate routine tool calls or repeat progress updates.
 
 After building, default to a short outcome (normally 60 words or fewer), the
 Visio/PDF links, at most one useful preview, and only material limitations.
+Both Scout and Cowork must deliver actual .vsdx and .pdf files, each with
+three pages. Cowork runs the portable renderer locally to its execution
+environment; never finish with a Scout handoff, JSON, scripts, or a PNG alone.
+Five requested examples warrant five clear PDF links, not one hidden archive.
 Do not print test suites, raw JSON, logs, internal plans, or every source URL.
 Explain tests or detailed recommendations only when the user asks.
 Put deeper source citations and design notes in an existing approved notes/review
-artifact, with a single optional "Design notes" link when useful. Do not add
-unrequested pages to a faithful reference or write classified content into plain
+artifact, or the prescribed third-page flowchart/write-up. Do not add pages
+beyond the v1.6 pack or write classified content into plain
 text just to hide it from chat. Otherwise retain detail in task/session context.
 
 GROUP RESEARCH WITHOUT HIDING SAFETY INFORMATION

@@ -13,11 +13,12 @@ if ([IO.Path]::GetExtension($OutputPath) -ine '.zip' -or (Test-Path -LiteralPath
 }
 $files = [ordered]@{ 'SKILL.md' = (Join-Path $SkillDirectory 'SKILL.md') }
 foreach ($name in @('AzureVisio.ps1', 'New-ReferenceModel.ps1', 'hub-spoke-reference.json',
-                    'environment.example.json', 'Test-AzureVisio.ps1', 'Build-AzureVisioPackage.ps1', 'README.txt',
-                    'Import-Draft.ps1', 'Draft-Import.Tests.ps1', 'Install-IconLibrary.ps1', 'icon-sources.json',
+                    'environment.example.json', 'Build-AzureVisioPackage.ps1', 'README.txt',
+                    'Import-Draft.ps1', 'Install-IconLibrary.ps1', 'icon-sources.json',
                     'Architecture-Guide.txt', 'architecture-references.json', 'CRUD-Guide.txt',
-                    'Reference-Workflow.txt', 'Reference-Fidelity.ps1', 'Reference-Fidelity.Tests.ps1',
-                    'Quiet-Workflow.txt', 'Enterprise-Style.ps1', 'Install-ReferenceAtlas.ps1')) {
+                    'Reference-Workflow.txt', 'Reference-Fidelity.ps1',
+                    'Quiet-Workflow.txt', 'Enterprise-Style.ps1', 'Install-ReferenceAtlas.ps1',
+                    'portable_visio.py', 'portable_reference.py', 'requirements-portable.txt')) {
     $files[$name] = Join-Path $PSScriptRoot $name
 }
 $total = 0

@@ -5,6 +5,8 @@ environment.json
 !.env.example
 .scout/
 .copilot/
+__pycache__/
+*.py[cod]
 
 # Downloaded libraries and private working artifacts
 IconLibrary/

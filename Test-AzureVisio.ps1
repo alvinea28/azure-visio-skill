@@ -24,6 +24,7 @@ $drawing = Join-Path $OutputDirectory ('Azure-Hub-Spoke-Expanded-' + [guid]::New
 $checks = [System.Collections.Generic.List[string]]::new()
 $requestedIconDirectory=$IconDirectory
 $script:helperIconDirectory=''
+$script:enterpriseStylePath=Join-Path $PSScriptRoot 'Enterprise-Style.ps1'
 
 function Assert([bool]$Condition, [string]$Message) {
     if (-not $Condition) { throw "ASSERTION FAILED: $Message" }
@@ -56,9 +57,11 @@ $checks.Add('All companion PowerShell scripts parse.')
 $pureFunctions = @(
     'Get-Value','Get-AbsolutePath','Read-Environment','Get-CloudPath','Get-OpenDocument','Resolve-StencilPath','Connect-Visio',
     'Test-Field','Confirm-Number','Confirm-Identifier','Confirm-Fields','Confirm-Metadata','Confirm-Model',
+    'Confirm-ArchitecturePack','Confirm-PackMerge','Confirm-NativeArchitecturePack',
     'Confirm-EdgeSemantics','Confirm-TargetRef','Confirm-Changes','Resolve-Target','Get-UpdatePlan','Confirm-Unlocked',
-    'Read-Property','Test-Container','Get-IconCatalog','Resolve-IconRef','Get-TextHash',
+    'Read-Property','Test-Container','Test-PortableBoundary','Get-IconCatalog','Resolve-IconRef','Get-TextHash',
     'Get-CardStyle','Get-DisplayLabel','Get-CaptionLayout','Get-RoleShape',
+    'Get-ServicePort','Glue-End','Get-ShapeIndex','Get-NativeBounds','Get-NativeCaptionBounds','Get-NativeRouteGeometry','Test-RouteCrossing','Find-BoundaryRoute','Repair-NativeBoundaryRoutes','Get-NativeRoutingReport','Complete-NativeRouting',
     'Get-NativeShapes','Inspect-Shape','Inspect-Document','Export-Model','Get-CanonicalTargets','Get-DeletePlan','Confirm-DeleteApproval'
 )
 foreach ($function in $ast.FindAll({
@@ -298,7 +301,7 @@ try {
         [pscustomobject]@{id='source-notes';kind='note';label=('Detailed supporting source notes. '*100);x=5.5;y=4;width=10;height=7}
     );edges=@()}
     $notesExempt | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $stylePath -Encoding UTF8
-    Assert (Run-Helper @{Action='Validate';ModelPath=$stylePath}).valid 'Supporting notes pages are exempt while a primary diagram remains mandatory.'
+    Assert-Throws { Run-Helper @{Action='Validate';ModelPath=$stylePath} } '*NotesContract*'
     $inferred=$styleOriginal | ConvertFrom-Json
     foreach ($node in @($inferred.pages[0].nodes | Where-Object {$_.kind -eq 'card' -and (Get-Value $_ 'icon' '')})) {
         $node.PSObject.Properties.Remove('cardStyle'); $node.PSObject.Properties.Remove('displayLabel')
@@ -307,7 +310,115 @@ try {
     $inferredReport=& $styleHelper -ModelPath $stylePath -ReportOnly | ConvertFrom-Json
     Assert $inferredReport.valid 'Enterprise gate must infer icon style from icon/iconRef under enterprise profile, matching the renderer, and use the first canonical line as its default caption.'
     Assert (Run-Helper @{Action='Validate';ModelPath=$stylePath}).valid 'Controller and style helper agree on inferred icon styling.'
-    $checks.Add('Enterprise style: inferred/default captions, hidden semantics, notes-page exemption, and 14 negative ratio/text/boundary/profile/word-budget cases pass without COM.')
+    $checks.Add('Enterprise style: inferred/default captions, hidden semantics, contract-only notes exemption, and 14 negative ratio/text/boundary/profile/word-budget cases pass without COM.')
+
+    $pack=$styleOriginal | ConvertFrom-Json
+    $pack | Add-Member -NotePropertyName outputContract -NotePropertyValue 'architecture-pack-v1.6'
+    $pack | Add-Member -NotePropertyName hardening -NotePropertyValue ([pscustomobject]@{
+        status='already-enterprise';reason='The main design already includes the controls required for this approved architecture.'
+    })
+    $pack.pages[0].name='Main architecture'
+    $pack.pages[0] | Add-Member -NotePropertyName view -NotePropertyValue 'main'
+    $pack.pages[0] | Add-Member -NotePropertyName role -NotePropertyValue 'diagram'
+    $reviewText='The main architecture already includes the security and operational controls required by its approved scope. This review therefore does not propose another architecture or duplicate existing components. Ownership, access boundaries, monitoring responsibilities, and data handling remain those specified on the main page. Additional enterprise controls require an identified gap and separate approval rather than an automatic redesign.'
+    $narrative='The main architecture begins with route selection and passes the request to the storage service through the request relationship. The storage services retain the information required by their respective workloads. This flowchart describes those main components and relationships only. It does not introduce proposed hardening services. Operators use the canonical component descriptions and source requirements to understand ownership, expected behavior, and the responsibilities associated with every storage component.'
+    $pack.pages+=@(
+        [pscustomobject]@{name='Hardening applicability';title='Hardening applicability review';view='hardening';role='notes';width=11;height=8;furniture=$false;nodes=@(
+            [pscustomobject]@{id='review';kind='note';label=$reviewText;x=5.5;y=4;width=10;height=6}
+        );edges=@()},
+        [pscustomobject]@{name='Main flowchart';title='Main architecture flowchart and writeup';view='flowchart';role='notes';width=11;height=8;furniture=$false;nodes=@(
+            [pscustomobject]@{id='select-step';kind='card';cardStyle='detail';label='Select the correct storage route for the incoming request using the main architecture routing function.';mainNodeIds=@('function');mainEdgeIds=@('request');x=2.8;y=5.4;width=4.5;height=2.2},
+            [pscustomobject]@{id='store-step';kind='card';cardStyle='standard';label='Store workload information in the five designated storage services while preserving their documented ownership and responsibilities.';mainNodeIds=@('storage-0','storage-1','storage-2','storage-3','storage-4');mainEdgeIds=@();x=8.2;y=5.4;width=4.5;height=2.2},
+            [pscustomobject]@{id='writeup';kind='note';label=$narrative;x=5.5;y=2;width=10;height=2.4}
+        );edges=@([pscustomobject]@{id='flow-request';source='select-step';target='store-step';kind='logical';label='Route then store';direction='forward'})}
+    )
+    $packOriginal=ConvertTo-Json -InputObject $pack -Depth 40
+    $packPath=Join-Path $fixtures 'architecture-pack.json'
+    $packOriginal | Set-Content -LiteralPath $packPath -Encoding UTF8
+    Confirm-Model $pack
+    Confirm-ArchitecturePack $pack -Required
+    Assert (Run-Helper @{Action='Validate';ModelPath=$packPath}).styleReport.valid 'Valid three-page enterprise pack passes style and contract without COM.'
+    $referencePack=$packOriginal | ConvertFrom-Json; $referencePack.presentationProfile='reference'
+    Confirm-Model $referencePack
+    Assert ((& $styleHelper -InputModel $referencePack | ConvertFrom-Json).valid) 'Reference pack main/proposed pages obey the same icon-first presentation guardrails.'
+    $referencePack.pages[0].nodes[1].PSObject.Properties.Remove('cardStyle')
+    Confirm-Model $referencePack
+    Assert ((& $styleHelper -InputModel $referencePack | ConvertFrom-Json).valid) 'Reference pack inferred icon styling matches enterprise rendering without changing legacy reference defaults.'
+    $notApplicable=$packOriginal | ConvertFrom-Json; $notApplicable.hardening.status='not-applicable'
+    Confirm-Model $notApplicable
+    $proposed=$packOriginal | ConvertFrom-Json
+    $proposed.hardening.status='proposed'; $proposed.hardening.reason='Storage requires private access controls that are absent from the approved main design.'
+    $proposed.pages[1]=$proposed.pages[0] | ConvertTo-Json -Depth 40 | ConvertFrom-Json
+    $proposed.pages[1].name='Proposed enterprise hardening'; $proposed.pages[1].view='hardening'
+    $proposed.pages[1].nodes[1].details='Use private access controls to close the identified public access gap.'
+    Confirm-Model $proposed
+    Assert ((& $styleHelper -InputModel $proposed | ConvertFrom-Json).valid) 'A reasoned semantic change on a proposed architecture passes.'
+    $proposedOriginal=ConvertTo-Json -InputObject $proposed -Depth 40
+    $containment=$proposedOriginal | ConvertFrom-Json
+    $containment.pages[1].nodes=$containment.pages[0].nodes | ConvertTo-Json -Depth 40 | ConvertFrom-Json
+    $containment.pages[1].nodes[0] | Add-Member -NotePropertyName parent -NotePropertyValue 'system'
+    Confirm-Model $containment
+    $packCases=@(
+        @{name='unknown output contract';change={param($m) $m.outputContract='architecture-pack-v9'}},
+        @{name='null output contract';change={param($m) $m.outputContract=$null}},
+        @{name='array output contract';change={param($m) $m.outputContract=@('architecture-pack-v1.6')}},
+        @{name='legacy presentation';change={param($m) $m.presentationProfile='legacy'}},
+        @{name='missing hardening';change={param($m) $m.PSObject.Properties.Remove('hardening')}},
+        @{name='unknown status';change={param($m) $m.hardening.status='skip'}},
+        @{name='empty reason';change={param($m) $m.hardening.reason=' '}},
+        @{name='nonstring reason';change={param($m) $m.hardening.reason=17}},
+        @{name='extra page';change={param($m) $m.pages+=($m.pages[2] | ConvertTo-Json -Depth 40 | ConvertFrom-Json);$m.pages[3].name='Fourth page'}},
+        @{name='missing page';change={param($m) $m.pages=@($m.pages[0],$m.pages[2])}},
+        @{name='wrong page order';change={param($m) $m.pages=@($m.pages[1],$m.pages[0],$m.pages[2])}},
+        @{name='missing view';change={param($m) $m.pages[2].PSObject.Properties.Remove('view')}},
+        @{name='array view';change={param($m) $m.pages[2].view=@('flowchart')}},
+        @{name='main notes bypass';change={param($m) $m.pages[0].role='notes'}},
+        @{name='hardening diagram bypass';change={param($m) $m.pages[1].role='diagram'}},
+        @{name='flowchart diagram role';change={param($m) $m.pages[2].role='diagram'}},
+        @{name='redundant non-proposed diagram';change={param($m) $m.pages[1].nodes=$m.pages[0].nodes}},
+        @{name='short applicability review';change={param($m) $m.pages[1].nodes[0].label='Already enterprise.'}},
+        @{name='short writeup';change={param($m) $m.pages[2].nodes[2].label='Main flow.'}},
+        @{name='short flowchart label';change={param($m) $m.pages[2].nodes[0].label='Select route'}},
+        @{name='caption flowchart card';change={param($m) $m.pages[2].nodes[0].cardStyle='label'}},
+        @{name='missing reference array';change={param($m) $m.pages[2].nodes[0].PSObject.Properties.Remove('mainEdgeIds')}},
+        @{name='string reference array';change={param($m) $m.pages[2].nodes[0].mainNodeIds='function'}},
+        @{name='nonstrings in reference array';change={param($m) $m.pages[2].nodes[0].mainNodeIds=@(1)}},
+        @{name='unknown node reference';change={param($m) $m.pages[2].nodes[0].mainNodeIds=@('hardening-only')}},
+        @{name='wrong-case node reference';change={param($m) $m.pages[2].nodes[0].mainNodeIds=@('FUNCTION')}},
+        @{name='unknown edge reference';change={param($m) $m.pages[2].nodes[0].mainEdgeIds=@('flow-request')}},
+        @{name='missing card coverage';change={param($m) $m.pages[2].nodes[1].mainNodeIds=@('storage-0')}},
+        @{name='missing edge coverage';change={param($m) $m.pages[2].nodes[0].mainEdgeIds=@()}},
+        @{name='empty card mapping';change={param($m) $m.pages[2].nodes[0].mainNodeIds=@();$m.pages[2].nodes[0].mainEdgeIds=@()}},
+        @{name='mapping on wrong page';change={param($m) $m.pages[0].nodes[0] | Add-Member -NotePropertyName mainNodeIds -NotePropertyValue @('function')}},
+        @{name='no connected edges';change={param($m) $m.pages[2].edges=@()}},
+        @{name='self edge';change={param($m) $m.pages[2].edges[0].target='select-step'}},
+        @{name='undirected edge';change={param($m) $m.pages[2].edges[0].direction='none'}},
+        @{name='edge to narrative';change={param($m) $m.pages[2].edges[0].target='writeup'}},
+        @{name='disconnected flow card';change={param($m) $extra=$m.pages[2].nodes[0] | ConvertTo-Json -Depth 40 | ConvertFrom-Json;$extra.id='isolated';$m.pages[2].nodes+=$extra}}
+    )
+    foreach ($case in $packCases) {
+        $bad=$packOriginal | ConvertFrom-Json; & $case.change $bad
+        Assert-Throws { Confirm-Model $bad } '*'
+    }
+    $bad=$proposedOriginal | ConvertFrom-Json
+    $bad.pages[1].nodes=$bad.pages[0].nodes; $bad.pages[1].edges=$bad.pages[0].edges
+    Assert-Throws { Confirm-Model $bad } '*semantic architecture change*'
+    $bad=$proposedOriginal | ConvertFrom-Json; $bad.pages[1].edges=@()
+    Assert-Throws { Confirm-Model $bad } '*real card entities*'
+    $bad=$proposedOriginal | ConvertFrom-Json
+    $bad.pages[1].nodes=$bad.pages[0].nodes | ConvertTo-Json -Depth 40 | ConvertFrom-Json
+    foreach ($node in $bad.pages[1].nodes) { $node.x+=0.01 }
+    Assert-Throws { Confirm-Model $bad } '*semantic architecture change*'
+    $bad=$packOriginal | ConvertFrom-Json; $bad.pages[0].nodes[1].displayLabel='One two three four five six seven eight nine'
+    Assert-Throws { & $styleHelper -InputModel $bad } '*EntityCaption*'
+    Assert-Throws { Confirm-ArchitecturePack $crudModel -Required } '*-LegacyModel*'
+    Confirm-ArchitecturePack $crudModel
+    Assert-Throws { Run-Helper @{Action='New';ModelPath=$crudModelPath;DocumentPath=$drawing;NoLaunchVisio=$true} } '*-LegacyModel*'
+    $bad=$packOriginal | ConvertFrom-Json; $bad.outputContract='other'
+    $bad | ConvertTo-Json -Depth 40 | Set-Content -LiteralPath $packPath -Encoding UTF8
+    Assert-Throws { Run-Helper @{Action='Validate';ModelPath=$packPath} } '*Unknown outputContract*'
+    Assert-Throws { Run-Helper @{Action='New';LegacyModel=$true;ModelPath=$packPath;DocumentPath=$drawing;NoLaunchVisio=$true} } '*Unknown outputContract*'
+    $checks.Add("Architecture pack: three statuses, reference/enterprise style, multi-ID coverage, explicit legacy opt-in and $($packCases.Count+5) malformed/downgrade/duplicate cases pass without COM.")
 
     $IconDirectory=Join-Path $fixtures 'icons'
     [void][IO.Directory]::CreateDirectory($IconDirectory)
@@ -443,7 +554,8 @@ try {
     }
     $root=New-MockShape 20; $caption=New-MockShape 21; $glyph=New-MockShape 22
     foreach ($pair in @{AvId='icon-node';Kind='card';CardStyle='icon';FullLabel="Canonical service`nOriginal full description";Icon='storage';IconSize='0.72';IconAspect='1';Details='Native notes';SourceIdRef='source-icon';BaseFontSize='10'}.GetEnumerator()) { Set-MockProperty $root $pair.Key $pair.Value }
-    $root.Text="Canonical service`nOriginal full description"
+    $root | Add-Member -NotePropertyName Characters -NotePropertyValue ([pscustomobject]@{Text="Canonical service`nOriginal full description"})
+    $root.Text='Visible service'
     $root.CellMap.Height.ResultIU=1.4
     $root.CellMap['HideText']=[pscustomobject]@{ResultIU=1}
     $caption.Text='Visible service'; $caption.NameU='Arbitrary-manual-name'
@@ -452,8 +564,9 @@ try {
     $root.Shapes=New-MockCollection @($caption,$glyph)
     $pageMock.Shapes=New-MockCollection @($root)
     $record=Inspect-Shape $root
-    Assert ($record.label -ceq $root.Text -and $record.displayLabel -eq $caption.Text -and $record.sourceId -eq 'source-icon') 'Inspect reads actual canonical and actual tagged caption text independently of NameU.'
+    Assert ($record.label -ceq $root.Characters.Text -and $record.displayLabel -eq $caption.Text -and $record.sourceId -eq 'source-icon') 'Inspect reads the own-group canonical text even when Shape.Text aliases the caption.'
     $roundtrip=Export-Model $documentMock
+    Assert ($roundtrip.pages[0].nodes[0].label -ceq $root.Characters.Text -and $record.canonicalLabelSource -ceq 'root.Characters.Text') 'Export preserves full canonical text rather than the caption proxy or stale metadata.'
     Assert ($roundtrip.pages[0].nodes[0].details -eq 'Native notes' -and $roundtrip.pages[0].nodes[0].iconSize -eq 0.72 -and $roundtrip.pages[0].nodes[0].displayLabel -eq 'Visible service') 'Semantic export retains caption, notes, and nominal icon size.'
     Confirm-Model $roundtrip
     $request='{"schemaVersion":1,"updates":[{"pageId":0,"visioId":20,"set":{"displayLabel":"Short caption","details":"New notes"}}]}' | ConvertFrom-Json
@@ -465,6 +578,427 @@ try {
     Assert ($null -eq (Inspect-Shape $root).displayLabel) 'Missing tagged caption is reported, never guessed from icon text.'
     Assert-Throws { Export-Model $documentMock } '*native caption child missing or ambiguous*'
     $checks.Add('Tagged native caption inspection/export and safe update preflight preserve canonical content; missing captions and brand-distorting resizes fail explicitly.')
+    function New-MockPackDocument($Model) {
+        $nativePages=@(); $nextId=100
+        foreach ($spec in $Model.pages) {
+            $pageSheet=New-MockShape 0
+            $pageSheet.CellMap['PageWidth']=[pscustomobject]@{ResultIU=$spec.width}
+            $pageSheet.CellMap['PageHeight']=[pscustomobject]@{ResultIU=$spec.height}
+            Set-MockProperty $pageSheet 'AvFurniture' 'False'
+            Set-MockProperty $pageSheet 'AvPageRole' $spec.role
+            Set-MockProperty $pageSheet 'AvPageView' $spec.view
+            $index=@{}; $nativeShapes=@(); $connections=@()
+            foreach ($node in $spec.nodes) {
+                $nextId++; $native=New-MockShape $nextId
+                $native.Text=$node.label
+                foreach ($pair in @(@('x','PinX'),@('y','PinY'),@('width','Width'),@('height','Height'))) { $native.CellMap[$pair[1]].ResultIU=$node.($pair[0]) }
+                Set-MockProperty $native 'AvId' $node.id; Set-MockProperty $native 'Kind' $node.kind
+                foreach ($pair in @(@('details','Details'),@('purpose','Purpose'),@('icon','Icon'),@('boundaryType','BoundaryType'))) {
+                    if (Test-Field $node $pair[0]) { Set-MockProperty $native $pair[1] $node.($pair[0]) }
+                }
+                foreach ($pair in @(@('mainNodeIds','MainNodeIds'),@('mainEdgeIds','MainEdgeIds'))) {
+                    if (Test-Field $node $pair[0]) { Set-MockProperty $native $pair[1] (ConvertTo-Json -InputObject $node.($pair[0]) -Compress) }
+                }
+                if ($node.kind -eq 'container') {
+                    $containerCell=[pscustomobject]@{}
+                    $containerCell | Add-Member ScriptMethod ResultStr {param($units) return 'Container'}
+                    $native.CellMap['User.msvStructureType']=$containerCell
+                    $membership=[pscustomobject]@{}
+                    $membership | Add-Member ScriptMethod GetMemberShapes {param($flags) return @()}
+                    $native | Add-Member -NotePropertyName ContainerProperties -NotePropertyValue $membership
+                } elseif ($node.kind -eq 'card') {
+                    $style=Get-CardStyle $node $Model.presentationProfile
+                    Set-MockProperty $native 'CardStyle' $style; Set-MockProperty $native 'BaseFontSize' '10'
+                    if ($style -in @('icon','label')) {
+                        $native | Add-Member -NotePropertyName Characters -NotePropertyValue ([pscustomobject]@{Text=$node.label})
+                        $nextId++; $child=New-MockShape $nextId; $child.Text=Get-DisplayLabel $node
+                        Set-MockProperty $child 'AvRole' 'caption'
+                        $children=@($child)
+                        Set-MockProperty $native 'FullLabel' $node.label
+                        $native.CellMap['HideText']=[pscustomobject]@{ResultIU=1}
+                        if ($style -eq 'icon') {
+                            $nextId++; $glyph=New-MockShape $nextId
+                            $glyph.CellMap.Width.ResultIU=0.72; $glyph.CellMap.Height.ResultIU=0.72
+                            Set-MockProperty $glyph 'AvRole' 'icon'; $children+=$glyph
+                            Set-MockProperty $native 'IconSize' '0.72'; Set-MockProperty $native 'IconAspect' '1'
+                        }
+                        $native.Shapes=New-MockCollection $children
+                    }
+                }
+                $index[$node.id]=$native; $nativeShapes+=$native
+            }
+            foreach ($edge in $spec.edges) {
+                $nextId++; $native=New-MockShape $nextId $true; $native.Text=$edge.label
+                foreach ($pair in @(@('id','AvId'),@('kind','Relationship'),@('source','SourceId'),@('target','TargetId'))) { Set-MockProperty $native $pair[1] $edge.($pair[0]) }
+                $glue=@(
+                    [pscustomobject]@{FromSheet=$native;FromCell=[pscustomobject]@{Name='BeginX'};ToSheet=$index[$edge.source];ToCell=[pscustomobject]@{Name='PinX'}},
+                    [pscustomobject]@{FromSheet=$native;FromCell=[pscustomobject]@{Name='EndX'};ToSheet=$index[$edge.target];ToCell=[pscustomobject]@{Name='PinX'}}
+                )
+                $native.Connects=New-MockCollection $glue; $connections+=$glue; $nativeShapes+=$native
+            }
+            $nativePages+=[pscustomobject]@{ID=$nativePages.Count;Name=$spec.name;Shapes=(New-MockCollection $nativeShapes);PageSheet=$pageSheet;Layers=(New-MockCollection @());Connects=(New-MockCollection $connections)}
+        }
+        $documentSheet=New-MockShape 0
+        Set-MockProperty $documentSheet 'OutputContract' $Model.outputContract
+        Set-MockProperty $documentSheet 'Hardening' (ConvertTo-Json -InputObject $Model.hardening -Compress)
+        Set-MockProperty $documentSheet 'PresentationProfile' $Model.presentationProfile
+        return [pscustomobject]@{FullName='C:\Diagrams\architecture-pack.vsdx';Title=$Model.title;Saved=$true;DocumentSheet=$documentSheet;Pages=(New-MockCollection $nativePages)}
+    }
+    $pack=$packOriginal | ConvertFrom-Json
+    $nativePack=New-MockPackDocument $pack
+    $snapshot=Inspect-Document $nativePack
+    Assert ($snapshot.outputContract -ceq $pack.outputContract -and $snapshot.hardening.status -ceq $pack.hardening.status -and
+        ($snapshot.pages.view -join ',') -ceq 'main,hardening,flowchart') 'Native inspection preserves document contract, parsed hardening JSON and ordered AvPageView metadata.'
+    $roundtrip=Export-Model $nativePack
+    Assert ($roundtrip.outputContract -ceq $pack.outputContract -and $roundtrip.hardening.reason -ceq $pack.hardening.reason -and
+        $roundtrip.pages[2].nodes[1].mainNodeIds.Count -eq 5 -and $roundtrip.pages[2].nodes[1].mainEdgeIds -is [array] -and
+        $roundtrip.pages[2].nodes[1].mainEdgeIds.Count -eq 0 -and $roundtrip.pages[2].nodes[0].mainEdgeIds[0] -eq 'request') 'Export preserves multi-ID and empty-array MAIN coverage exactly, never guessing references.'
+    Confirm-NativeArchitecturePack $nativePack
+    Confirm-PackMerge $nativePack $pack
+    Assert-Throws { Confirm-PackMerge $nativePack $crudModel } '*cannot remove or change*'
+    $bad=$packOriginal | ConvertFrom-Json; $bad.pages[0].name='Renamed main'
+    Assert-Throws { Confirm-PackMerge $nativePack $bad } '*cannot add, rename, reorder*'
+    $bad=$packOriginal | ConvertFrom-Json; $bad.pages[0].view='hardening'
+    Assert-Throws { Confirm-PackMerge $nativePack $bad } '*in that order*'
+    $bad=$packOriginal | ConvertFrom-Json; $bad.hardening.status='not-applicable'
+    Assert-Throws { Confirm-PackMerge $nativePack $bad } '*cannot change hardening*'
+    $flow=$nativePack.Pages.Item(3)
+    $flow.Shapes.Entries[0].CellMap.Remove('Prop.MainEdgeIds')
+    Assert-Throws { Confirm-NativeArchitecturePack $nativePack } '*mainEdgeIds string arrays*'
+    Set-MockProperty $flow.Shapes.Entries[0] 'MainEdgeIds' '["request"]'
+    Set-MockProperty $flow.Shapes.Entries[0] 'MainNodeIds' '["hardening-only"]'
+    Assert-Throws { Export-Model $nativePack } '*Unknown MAIN reference*'
+    Set-MockProperty $flow.Shapes.Entries[0] 'MainNodeIds' '["function"]'
+    $flow.Shapes.Entries[0].Text='Too short'
+    Assert-Throws { Confirm-NativeArchitecturePack $nativePack } '*meaningful labels*'
+    $flow.Shapes.Entries[0].Text=$pack.pages[2].nodes[0].label
+    $flow.Shapes.Entries[2].CellMap['HideText']=[pscustomobject]@{ResultIU=1}
+    Assert-Throws { Export-Model $nativePack } '*not a visible explanation*'
+    $flow.Shapes.Entries[2].CellMap.Remove('HideText')
+    $nativePack.Pages.Entries=@($nativePack.Pages.Entries[2],$nativePack.Pages.Entries[1],$nativePack.Pages.Entries[0])
+    Assert-Throws { Export-Model $nativePack } '*in that order*'
+    $nativePack=New-MockPackDocument $pack
+    Set-MockProperty $nativePack.DocumentSheet 'OutputContract' 'unknown'
+    Assert-Throws { Export-Model $nativePack } '*Unknown outputContract*'
+    $nativePack=New-MockPackDocument $pack
+    Set-MockProperty $nativePack.Pages.Item(3).Shapes.Entries[0] 'MainNodeIds' '"function"'
+    Assert-Throws { Inspect-Document $nativePack } '*Invalid MainNodeIds*'
+    $checks.Add('Mock-native pack inspection/export preserves exact metadata, validates ordering and coverage, rejects malformed Shape Data and blocks merge downgrade/page changes and invalid post-edit exports without COM.')
+    $referencePack=$packOriginal | ConvertFrom-Json
+    $referencePack.presentationProfile='reference'
+    $nativeReference=New-MockPackDocument $referencePack
+    $nativeEnterprise=New-MockPackDocument $pack
+    $savedStylePath=$script:enterpriseStylePath
+    $script:enterpriseStylePath={param($InputModel) throw 'Enterprise-only export style gate was invoked.'}
+    try {
+        $referenceRoundtrip=Export-Model $nativeReference
+        Assert ($referenceRoundtrip.presentationProfile -ceq 'reference' -and
+            $referenceRoundtrip.outputContract -ceq 'architecture-pack-v1.6' -and
+            ($referenceRoundtrip.pages.view -join ',') -ceq 'main,hardening,flowchart') 'Native reference pack export preserves profile and contract without invoking enterprise-only presentation policy.'
+        Confirm-NativeArchitecturePack $nativeReference
+        Assert-Throws { Export-Model $nativeEnterprise } '*Enterprise-only export style gate was invoked*'
+        $nativeReference.Pages.Item(3).Shapes.Entries[0].CellMap.Remove('Prop.MainEdgeIds')
+        Assert-Throws { Confirm-NativeArchitecturePack $nativeReference } '*mainEdgeIds string arrays*'
+    } finally { $script:enterpriseStylePath=$savedStylePath }
+    $checks.Add('Reference-profile native pack export and CRUD guards skip enterprise-only presentation policy while retaining contract, ordering and MAIN coverage checks; enterprise exports still invoke their style gate.')
+    $portableDocument=New-MockPackDocument $pack
+    Set-MockProperty $portableDocument.DocumentSheet 'PortableRenderer' 'azure-visio-1.6'
+    $portablePage=$portableDocument.Pages.Item(1)
+    $boundary=@($portablePage.Shapes.Entries | Where-Object { (Read-Property $_ 'AvId') -eq 'system' })[0]
+    $child=@($portablePage.Shapes.Entries | Where-Object { (Read-Property $_ 'AvId') -eq 'function' })[0]
+    $boundary.CellMap.Remove('User.msvStructureType')
+    Set-MockProperty $boundary 'ContainerStyle' 'boundary'
+    $boundary.CellMap['FillPattern']=[pscustomobject]@{ResultIU=0}
+    Set-MockProperty $child 'ParentId' 'system'
+    foreach ($native in @($boundary,$child)) {
+        $native.CellMap['LocPinX']=[pscustomobject]@{ResultIU=$native.CellMap.Width.ResultIU/2}
+        $native.CellMap['LocPinY']=[pscustomobject]@{ResultIU=$native.CellMap.Height.ResultIU/2}
+    }
+    $boundaryRecord=Inspect-Shape $boundary
+    Assert (-not $boundaryRecord.isContainer -and -not (Test-Field $boundaryRecord 'memberIds') -and
+        (Test-PortableBoundary $boundaryRecord 'azure-visio-1.6')) 'Portable rectangles remain semantic boundaries, never fabricated native containers or native member lists.'
+    $portableExport=Export-Model $portableDocument
+    $exportedBoundary=@($portableExport.pages[0].nodes | Where-Object id -eq 'system')[0]
+    $exportedChild=@($portableExport.pages[0].nodes | Where-Object id -eq 'function')[0]
+    Assert ($exportedBoundary.kind -eq 'container' -and $exportedBoundary.containerStyle -eq 'boundary' -and
+        $exportedChild.parent -eq 'system' -and @($portableExport.warnings | Where-Object { $_ -like '*semantic-boundary mode*' }).Count -eq 1) 'Portable boundary export recovers validated semantic parent metadata and explicitly warns that native membership is not claimed.'
+    foreach ($parentId in @('missing-parent','SYSTEM','system;unsafe')) {
+        Set-MockProperty $child 'ParentId' $parentId
+        Assert-Throws { Export-Model $portableDocument } '*'
+    }
+    Set-MockProperty $child 'ParentId' 'system'
+    $originalChildX=$child.CellMap.PinX.ResultIU
+    $child.CellMap.PinX.ResultIU=0.8
+    Assert-Throws { Export-Model $portableDocument } '*outside parent*refusing to drop or change ParentId*'
+    $child.CellMap.PinX.ResultIU=$originalChildX
+    Set-MockProperty $boundary 'ParentId' 'system'
+    Assert-Throws { Export-Model $portableDocument } '*Container cycle*'
+    Set-MockProperty $boundary 'ParentId' ''
+    Set-MockProperty $portableDocument.DocumentSheet 'PortableRenderer' 'unknown-renderer'
+    Assert-Throws { Export-Model $portableDocument } '*containerStyle must be boundary and is only supported on containers*'
+    Set-MockProperty $portableDocument.DocumentSheet 'PortableRenderer' 'azure-visio-1.6'
+    $request='{"schemaVersion":1,"updates":[{"pageId":0,"shapeId":"system","set":{"width":9}}]}' | ConvertFrom-Json
+    Assert-Throws { Get-UpdatePlan $portableDocument $request } '*nonempty portable semantic boundaries*'
+    $request='{"schemaVersion":1,"updates":[{"pageId":0,"shapeId":"function","set":{"x":1}}]}' | ConvertFrom-Json
+    Assert-Throws { Get-UpdatePlan $portableDocument $request } '*no implicit semantic reparenting*'
+    $request.updates[0].set.x=5.2
+    Assert (@(Get-UpdatePlan $portableDocument $request).Count -eq 1 -and
+        $child.CellMap.PinX.ResultIU -eq $originalChildX -and (Read-Property $child 'ParentId') -eq 'system') 'Safe child movement preflights without changing ownership; failed preflights leave native geometry untouched.'
+    $request='{"schemaVersion":1,"updates":[{"pageId":0,"shapeId":"function","set":{"parent":"other"}}]}' | ConvertFrom-Json
+    Assert-Throws { Confirm-Changes $request 'Update' } '*Unsupported set property*'
+    $inner=New-MockShape 998
+    foreach ($pair in @{AvId='inner';Kind='container';ContainerStyle='boundary';BoundaryType='system';ParentId='system'}.GetEnumerator()) { Set-MockProperty $inner $pair.Key $pair.Value }
+    $inner.Text='Inner boundary'; $inner.CellMap.PinX.ResultIU=5; $inner.CellMap.PinY.ResultIU=3
+    $inner.CellMap.Width.ResultIU=4; $inner.CellMap.Height.ResultIU=2
+    $inner.CellMap['FillPattern']=[pscustomobject]@{ResultIU=0}
+    $portablePage.Shapes=New-MockCollection (@($portablePage.Shapes.Entries)+@($inner))
+    Set-MockProperty $child 'ParentId' 'inner'
+    $nested=Export-Model $portableDocument
+    Assert (@($nested.pages[0].nodes | Where-Object id -eq 'inner')[0].parent -eq 'system' -and
+        @($nested.pages[0].nodes | Where-Object id -eq 'function')[0].parent -eq 'inner') 'Nested portable boundary hierarchy is preserved without flattening.'
+    $nativeParent=New-MockShape 999
+    $nativeParent.Text='Native ownership'
+    $nativeParent.CellMap.PinX.ResultIU=5.5; $nativeParent.CellMap.PinY.ResultIU=4
+    $nativeParent.CellMap.Width.ResultIU=10; $nativeParent.CellMap.Height.ResultIU=7
+    Set-MockProperty $nativeParent 'AvId' 'native-parent'; Set-MockProperty $nativeParent 'Kind' 'container'
+    Set-MockProperty $nativeParent 'BoundaryType' 'system'
+    $containerCell=[pscustomobject]@{}
+    $containerCell | Add-Member ScriptMethod ResultStr {param($units) return 'Container'}
+    $nativeParent.CellMap['User.msvStructureType']=$containerCell
+    $membership=[pscustomobject]@{Members=@($child.ID)}
+    $membership | Add-Member ScriptMethod GetMemberShapes {param($flags) return $this.Members}
+    $nativeParent | Add-Member -NotePropertyName ContainerProperties -NotePropertyValue $membership
+    $portablePage.Shapes=New-MockCollection (@($portablePage.Shapes.Entries)+@($nativeParent))
+    Set-MockProperty $child 'ParentId' 'stale-portable-parent'
+    $authoritative=Export-Model $portableDocument
+    Assert (@($authoritative.pages[0].nodes | Where-Object id -eq 'function')[0].parent -eq 'native-parent' -and
+        @($authoritative.warnings | Where-Object { $_ -like '*native container membership overrides stored ParentId*' }).Count -eq 1) 'Real native membership overrides stale portable metadata.'
+    $membership.Members=@()
+    Set-MockProperty $child 'ParentId' 'native-parent'
+    $removed=Export-Model $portableDocument
+    Assert (-not (Test-Field @($removed.pages[0].nodes | Where-Object id -eq 'function')[0] 'parent') -and
+        @($removed.warnings | Where-Object { $_ -like '*not supported by native membership*' }).Count -eq 1) 'Missing genuine native membership is not invented from ParentId metadata.'
+    $checks.Add('Portable semantic boundaries preserve kinds and nested ParentId ownership with explicit warnings, enforce IDs/bounds/cycles, protect nonempty boundary geometry and child ownership, and defer to genuine native membership without fabricating containers.')
+    function New-RouteMock([double[]]$Points) {
+        $edge=New-MockShape 700 $true
+        $edge | Add-Member -NotePropertyName Coordinates -NotePropertyValue $Points
+        $edge | Add-Member -NotePropertyName GeometryCount -NotePropertyValue 1
+        $edge | Add-Member -NotePropertyName RowTags -NotePropertyValue @{}
+        $edge | Add-Member ScriptMethod RowCount {param($section) return $this.Coordinates.Count/2+1}
+        $edge | Add-Member ScriptMethod RowType {param($section,$row) if ($this.RowTags.ContainsKey($row)) { return $this.RowTags[$row] }; if ($row -eq 0) { return 137 }; if ($row -eq 1) { return 138 }; return 139}
+        $edge | Add-Member ScriptMethod CellsSRC {param($section,$row,$cell) if ($cell -eq 2) { return [pscustomobject]@{ResultIU=0.2} }; return [pscustomobject]@{ResultIU=$this.Coordinates[($row-1)*2+$cell]}}
+        $edge | Add-Member -NotePropertyName TransformAngle -NotePropertyValue 0.0
+        $edge | Add-Member ScriptMethod XYToPage {
+            param($x,$y,$outX,$outY)
+            $outX.Value=$x*[Math]::Cos($this.TransformAngle)-$y*[Math]::Sin($this.TransformAngle)
+            $outY.Value=$x*[Math]::Sin($this.TransformAngle)+$y*[Math]::Cos($this.TransformAngle)
+        }
+        return $edge
+    }
+    $orthogonal=New-RouteMock @(1.5,5,3.5,5,3.5,1.5,5,1.5)
+    $route=Get-NativeRouteGeometry $orthogonal
+    Assert ($route.available -and $route.orthogonal -and $route.segments.Count -eq 3 -and
+        ($route.segments.axis -join ',') -eq 'horizontal,vertical,horizontal') 'Actual nonaligned connector strokes are inspected as page-coordinate right-angle segments.'
+    $diagonal=New-RouteMock @(1.5,5,5,1.5)
+    $diagonal.CellMap['ShapeRouteStyle']=[pscustomobject]@{ResultIU=1}
+    Assert ((Get-NativeRouteGeometry $diagonal).diagonalCount -eq 1) 'An orthogonal ShapeRouteStyle setting cannot conceal an actually diagonal stroke.'
+    $curved=New-RouteMock @(0,0,1,0,2,0)
+    $curved.RowTags[3]=140
+    $curveReport=Get-NativeRouteGeometry $curved
+    Assert ($curveReport.available -and -not $curveReport.orthogonal -and $curveReport.curvedCount -eq 1 -and
+        $curveReport.segments[1].rowType -eq 140) 'ArcTo line jumps are flagged from actual Geometry rows rather than reduced to a misleading horizontal chord.'
+    $rotated=New-RouteMock @(0,0,2,0); $rotated.TransformAngle=[Math]::PI/4
+    Assert ((Get-NativeRouteGeometry $rotated).diagonalCount -eq 1) 'Local horizontal geometry rotated on the page is correctly reported as diagonal.'
+    Assert (-not (Get-NativeRouteGeometry (New-MockShape 701 $true)).available) 'Unavailable path geometry is reported as unverified, never guessed from routing settings.'
+    $service=[pscustomobject]@{visioId=1;id='producer';kind='card';serviceBounds=[pscustomobject]@{left=0.5;right=1.5;bottom=4.5;top=5.5}}
+    $destination=[pscustomobject]@{visioId=2;id='blob';kind='card';serviceBounds=[pscustomobject]@{left=5;right=6;bottom=1;top=2}}
+    $edgeRecord=[pscustomobject]@{
+        visioId=3;id='producer-blob';kind='edge';source='producer';target='blob';sourceVisioIds=@(1);targetVisioIds=@(2)
+        beginX=1.5;beginY=5;endX=5;endY=1.5;sourceSide='right';targetSide='left';sourcePosition=0.5;targetPosition=0.5
+        relationship='telemetry';direction='forward';routeStyle='orthogonal';routeGeometry=$route
+    }
+    $routePage=[pscustomobject]@{shapes=@($service,$destination,$edgeRecord)}
+    Assert (Get-NativeRoutingReport $routePage).valid 'Nonaligned telemetry icon-to-label endpoints with real full-shape glue and orthogonal bends are accepted.'
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry $diagonal
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'DiagonalRoute').Count -eq 1) 'Page route validation inspects actual diagonal geometry rather than routeStyle.'
+    $edgeRecord.routeGeometry=$route
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(1.5,5,0.1,5,0.1,1.5,5,1.5))
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'EndpointDirection').Count -eq 1) 'A visually orthogonal connector leaving its right-side port to the left is invalid; inward Visio connection vectors must be the inverse of the outward route escape.'
+    $edgeRecord.routeGeometry=$route
+    $edgeRecord.target='invented-target'
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'EndpointIdentity').Count -eq 1) 'Glue to a different service cannot satisfy the declared relationship.'
+    $edgeRecord.target='blob'; $edgeRecord.beginX=3
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'EndpointWhitespace').Count -eq 1) 'Endpoint on an oversized invisible group edge is rejected when it does not reach the glyph.'
+    $edgeRecord.beginX=1.5
+    $edgeRecord.sourceSide='left'
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'SelectedPortMismatch').Count -eq 1) 'A different visible side does not satisfy the selected port.'
+    $edgeRecord.sourceSide='right'
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(1.5,5,3.5,5,3.5,1.5,4.8,1.5))
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'StrokeEndpointMismatch').Count -eq 1) 'Visible stroke must actually reach the glued endpoint, not merely store the correct Begin/End cells.'
+    $edgeRecord.routeGeometry=$route
+    $obstacle=[pscustomobject]@{visioId=4;id='unrelated-caption';kind='card'
+        serviceBounds=[pscustomobject]@{left=7;right=8;bottom=3;top=4}
+        captionBounds=[pscustomobject]@{left=3;right=4;bottom=3;top=3.4}}
+    $routePage.shapes+=@($obstacle)
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'RouteObstruction').Count -eq 1) 'Orthogonal shortcuts through another service caption are rejected.'
+    $routePage.shapes=@($service,$destination,$edgeRecord)
+    $service | Add-Member -NotePropertyName cardStyle -NotePropertyValue 'icon'
+    $service | Add-Member -NotePropertyName captionBounds -NotePropertyValue ([pscustomobject]@{left=0.5;right=1.5;bottom=3.7;top=4.1})
+    $edgeRecord.beginX=1; $edgeRecord.beginY=4.5; $edgeRecord.sourceSide='bottom'
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(1,4.5,1,1.5,5,1.5))
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'RouteObstruction').Count -eq 1) 'A bottom glyph attachment may not exit through its own service caption.'
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(1,4.5,2,4.5,2,1.5,5,1.5))
+    $wrongBottom=Get-NativeRoutingReport $routePage
+    Assert (@($wrongBottom.issues | Where-Object code -eq 'SelectedPortMismatch').Count -eq 1 -and
+        $wrongBottom.attachments[0].region -eq 'glyph' -and $wrongBottom.attachments[0].expectedRegion -eq 'caption') 'A declared icon bottom port must use the approved caption-bottom convention, even if a glyph-bottom route avoids text; inspection does not mislabel the actual glyph attachment.'
+    $edgeRecord.beginY=3.7
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(1,3.7,1,1.5,5,1.5))
+    $captionRoute=Get-NativeRoutingReport $routePage
+    Assert ($captionRoute.valid -and $captionRoute.attachments[0].region -eq 'caption') 'Native and portable bottom ports on the actual caption lower edge are valid semantic service attachments, not falsely reported as misglued.'
+    $edgeRecord.sourcePosition=0.25; $edgeRecord.beginX=0.75
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(0.75,3.7,0.75,1.5,5,1.5))
+    Assert (Get-NativeRoutingReport $routePage).valid 'Bottom position fractions use the actual caption width, independently of glyph and invisible group widths.'
+    $edgeRecord.beginX=0
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(0,3.7,0,1.5,5,1.5))
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'EndpointWhitespace').Count -eq 1) 'A point on broad group whitespace outside the actual caption is not excused by the bottom-port convention.'
+    $edgeRecord.beginX=0.75
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(0.75,3.7,0.75,4.3,3.5,4.3,3.5,1.5,5,1.5))
+    Assert (@((Get-NativeRoutingReport $routePage).issues | Where-Object code -eq 'RouteObstruction').Count -eq 1) 'Even a correctly attached caption-bottom port cannot send its stroke upward through its own text.'
+    $edgeRecord.sourcePosition=0.5
+    $edgeRecord.beginY=5
+    $edgeRecord.beginX=0.5; $edgeRecord.endX=6; $edgeRecord.sourceSide='left'; $edgeRecord.targetSide='right'
+    $edgeRecord.direction='backward'
+    $edgeRecord.routeGeometry=Get-NativeRouteGeometry (New-RouteMock @(0.5,5,0.1,5,0.1,0.3,6.4,0.3,6.4,1.5,6,1.5))
+    Assert ((Get-NativeRoutingReport $routePage).valid -and $edgeRecord.source -eq 'producer' -and $edgeRecord.target -eq 'blob' -and
+        $edgeRecord.direction -eq 'backward') 'Return/back edges route around services without inventing endpoints or reversing relationship semantics.'
+    $checks.Add('Actual stroke routing checks detect diagonals, curved/rotated paths, wrong glue/ports, whitespace, disconnected strokes, and own/unrelated caption crossings; fitted-caption bottom ports, nonaligned telemetry and back edges retain semantics.')
+
+    $portRoot=New-MockShape 710
+    $portRoot.CellMap.Width.ResultIU=4; $portRoot.CellMap.Height.ResultIU=2
+    Set-MockProperty $portRoot 'AvId' 'wide-service'; Set-MockProperty $portRoot 'CardStyle' 'icon'
+    $portGlyph=New-MockShape 711
+    $portGlyph.CellMap.PinX.ResultIU=2; $portGlyph.CellMap.PinY.ResultIU=1.5
+    $portGlyph.CellMap.Width.ResultIU=0.6; $portGlyph.CellMap.Height.ResultIU=0.4
+    Set-MockProperty $portGlyph 'AvRole' 'icon'
+    $portCaption=New-MockShape 713
+    $portCaption.CellMap.PinX.ResultIU=2; $portCaption.CellMap.PinY.ResultIU=0.4
+    $portCaption.CellMap.Width.ResultIU=1.2; $portCaption.CellMap.Height.ResultIU=0.4
+    $portCaption | Add-Member ScriptMethod BoundingBox {
+        param($flags,$outLeft,$outBottom,$outRight,$outTop)
+        $outLeft.Value=1.44; $outRight.Value=2.56; $outBottom.Value=0.24; $outTop.Value=0.56
+    }
+    Set-MockProperty $portCaption 'AvRole' 'caption'
+    $portRoot.Shapes=New-MockCollection @($portGlyph,$portCaption)
+    $portRoot | Add-Member ScriptMethod AddNamedRow {
+        param($section,$row,$tag)
+        foreach ($field in @('X','Y','DirX','DirY','Type')) { $this.CellMap["Connections.$row.$field"]=[pscustomobject]@{FormulaU='';OwnerId=$this.ID} }
+        return 0
+    }
+    $glueCell=[pscustomobject]@{GluedTo=$null}
+    $glueCell | Add-Member ScriptMethod GlueTo {param($target) $this.GluedTo=$target}
+    Glue-End $glueCell $portRoot 'bottom' 0.5
+    $bottomPort=Get-ServicePort $portRoot 'bottom' 0.5
+    Assert ([Math]::Abs($bottomPort.u-0.5) -lt 0.0001 -and [Math]::Abs($bottomPort.v-0.1) -lt 0.0001 -and
+        $bottomPort.dirY -eq -1 -and $bottomPort.region -eq 'caption' -and $glueCell.GluedTo.OwnerId -eq 710) 'Bottom icon port is on the actual fitted-caption lower edge, not broad group whitespace; glue remains on the full service group.'
+    Assert ([Math]::Abs((Get-ServicePort $portRoot 'bottom' 0.25).u-0.425) -lt 0.0001) 'Bottom port fractions track caption width rather than glyph or invisible anchor width.'
+    Assert ($portRoot.CellMap['Connections.AvPortbottom0_5.X'].FormulaU -like '*Sheet.713!Width*' -and
+        $portRoot.CellMap['Connections.AvPortbottom0_5.Y'].FormulaU -like '*Sheet.713!PinY*') 'Native caption ports dynamically follow caption text-width/height edits rather than retaining stale normalized coordinates.'
+    Assert ($portRoot.CellMap['Connections.AvPortbottom0_5.DirY'].FormulaU -eq '1') 'Type=0 native bottom connection has an inward positive-Y vector so Visio routes its stroke outward/down, not upward through the caption.'
+    $rightPort=Get-ServicePort $portRoot 'right' 0.5
+    Assert ([Math]::Abs($rightPort.u-0.575) -lt 0.0001 -and $rightPort.dirX -eq 1) 'Right icon port ignores invisible group whitespace.'
+    Glue-End $glueCell $portRoot 'bottom' 0.5
+    Assert (@($portRoot.CellMap.Keys | Where-Object { $_ -like 'Connections.*.X' }).Count -eq 1) 'Stable named ports are reused rather than adding drifting connection points.'
+    $labelRoot=New-MockShape 712
+    Set-MockProperty $labelRoot 'CardStyle' 'label'
+    $labelCaption=New-MockShape 714
+    $labelCaption.CellMap.PinX.ResultIU=1; $labelCaption.CellMap.PinY.ResultIU=0.5
+    $labelCaption.CellMap.Width.ResultIU=1; $labelCaption.CellMap.Height.ResultIU=0.4
+    $labelCaption | Add-Member ScriptMethod BoundingBox {
+        param($flags,$outLeft,$outBottom,$outRight,$outTop)
+        $outLeft.Value=0.54; $outRight.Value=1.46; $outBottom.Value=0.34; $outTop.Value=0.66
+    }
+    Set-MockProperty $labelCaption 'AvRole' 'caption'
+    $labelRoot.Shapes=New-MockCollection @($labelCaption)
+    Assert ((Get-ServicePort $labelRoot 'left' 0.25).u -eq 0.25 -and
+        [Math]::Abs((Get-ServicePort $labelRoot 'left' 0.25).v-0.4) -lt 0.0001) 'Label-only services retain explicit positions on the fitted text perimeter, not the invisible group.'
+    Assert ((Get-ServicePort $labelRoot 'right').u -eq 0.75 -and
+        [Math]::Abs((Get-ServicePort $labelRoot 'top').v-0.7) -lt 0.0001 -and
+        [Math]::Abs((Get-ServicePort $labelRoot 'bottom').v-0.3) -lt 0.0001) 'All four label-only sides use actual caption bounds.'
+    $labelCaption.CellMap.Width.ResultIU=2
+    $measured=Get-NativeCaptionBounds $labelCaption -Local
+    Assert ([Math]::Abs($measured.left-0.5) -lt 0.0001 -and [Math]::Abs($measured.right-1.5) -lt 0.0001 -and
+        [Math]::Abs((Get-ServicePort $labelRoot 'left').u-0.25) -lt 0.0001) 'Older portable caption children spanning the whole node are measured from native text extent, not mistaken for visible text or broad whitespace attachment.'
+    $measuredPort=Get-ServicePort $labelRoot 'bottom' 0.15
+    Assert ($measuredPort.xFormula -notmatch 'TEXTWIDTH' -and $measuredPort.xFormula -like '*Width*0.5*' -and
+        [Math]::Abs($measuredPort.u-0.325) -lt 0.0001) 'Caption port formulas encode exactly the inspected BoundingBox extent rather than a different TEXTWIDTH measurement; noncentral .15 positions agree.'
+    $setLabelFunction=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Set-NodeLabel'},$true))[0]
+    Assert ($setLabelFunction.Extent.Text -match 'TEXTWIDTH\(TheText' -and
+        $setLabelFunction.Extent.Text -match "CellsU\('Height'\).ResultIUForce=\`$layout.captionHeight") 'Caption rectangles fit native measured text width and actual caption lines, including label-only cards.'
+    $addEdgeFunction=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Add-Edge'},$true))[0]
+    Assert ($addEdgeFunction.Extent.Text -match "ShapeRouteStyle'\)\.FormulaU = '1'" -and
+        $addEdgeFunction.Extent.Text -notmatch '\$route=''straight''') 'New connectors always normalize authored routing to right angles; no icon/label straight shortcut remains.'
+    $checks.Add('Full-service named cardinal ports use glyph left/right/top and fitted-caption bottom, preserve label positions, follow caption edits dynamically, and normalize new routing instead of diagonal straight shortcuts.')
+
+    $boundaryStart=[pscustomobject]@{x=11.14;y=2.24}
+    $boundaryEnd=[pscustomobject]@{x=6.1;y=1.75}
+    $boundaryObstacles=@(
+        [pscustomobject]@{left=2;right=10.2;bottom=1.75;top=9.25},
+        [pscustomobject]@{left=11.14;right=11.86;bottom=1.88;top=2.60},
+        [pscustomobject]@{left=10.788;right=12.212;bottom=1.25;top=1.747}
+    )
+    $boundaryRoute=Find-BoundaryRoute $boundaryStart $boundaryEnd 'left' 'bottom' $boundaryObstacles 18 11
+    Assert ($boundaryRoute[1].x -lt $boundaryStart.x -and $boundaryRoute[-2].y -lt $boundaryEnd.y) 'Native container fallback leaves the glyph and approaches the boundary from the selected exterior sides.'
+    for ($i=1; $i -lt $boundaryRoute.Count; $i++) {
+        $a=$boundaryRoute[$i-1]; $b=$boundaryRoute[$i]
+        Assert ([Math]::Abs($a.x-$b.x) -lt 0.000001 -or [Math]::Abs($a.y-$b.y) -lt 0.000001) 'Boundary gutter route is genuinely orthogonal.'
+        $segment=[pscustomobject]@{fromX=$a.x;fromY=$a.y;toX=$b.x;toY=$b.y;axis=$(if ($a.y -eq $b.y) {'horizontal'} else {'vertical'})}
+        foreach ($bounds in $boundaryObstacles) { Assert (-not (Test-RouteCrossing $segment $bounds)) 'Boundary gutter avoids the container interior and all glyph/caption obstacles.' }
+    }
+    Assert-Throws { Find-BoundaryRoute $boundaryStart $boundaryEnd 'left' 'bottom' @([pscustomobject]@{left=0;right=18;bottom=0;top=11}) 18 11 } '*No clear orthogonal boundary approach*'
+    $checks.Add('Native-container exterior gutter routes preserve selected endpoint directions and avoid glyphs/captions; blocked layouts fail rather than creating shortcut strokes.')
+
+    $rerouteEdge=New-MockShape 720 $true; Set-MockProperty $rerouteEdge 'Kind' 'edge'
+    foreach ($cell in @('ShapeRouteStyle','ConFixedCode','ConLineRouteExt','ConLineJumpCode','Rounding')) { $rerouteEdge.CellMap[$cell]=[pscustomobject]@{FormulaU='2';ResultIU=2} }
+    $rerouteNode=New-MockShape 721; Set-MockProperty $rerouteNode 'Kind' 'card'
+    $routeSelection=[pscustomobject]@{Selected=[Collections.Generic.List[int]]::new();LayoutCalls=0}
+    $routeSelection | Add-Member ScriptMethod Select {param($shape,$flags) $this.Selected.Add([int]$shape.ID)}
+    $routeSelection | Add-Member ScriptMethod Layout {$this.LayoutCalls++}
+    $reroutePage=[pscustomobject]@{Shapes=(New-MockCollection @($rerouteNode,$rerouteEdge));Selection=$routeSelection}
+    $reroutePage | Add-Member ScriptMethod CreateSelection {param($type,$mode,$data) return $this.Selection}
+    $rerouteDocument=[pscustomobject]@{Pages=(New-MockCollection @($reroutePage))}
+    Complete-NativeRouting $rerouteDocument -Force
+    Assert ($routeSelection.LayoutCalls -eq 1 -and $routeSelection.Selected.Count -eq 1 -and $routeSelection.Selected[0] -eq 720 -and
+        $rerouteEdge.CellMap.ShapeRouteStyle.FormulaU -eq '1' -and $rerouteEdge.CellMap.ConFixedCode.FormulaU -eq '0' -and
+        $rerouteEdge.CellMap.ConLineRouteExt.FormulaU -eq '1' -and $rerouteNode.CellMap.PinX.ResultIU -eq 2) 'Final layout reroutes connectors only with freely routed straight orthogonal segments, without moving nodes.'
+    $reroutePage.Shapes=New-MockCollection @($rerouteNode)
+    Complete-NativeRouting $rerouteDocument -Force
+    Assert ($routeSelection.LayoutCalls -eq 1) 'Empty connector selections never call Layout, which would otherwise relayout every shape.'
+    Set-MockProperty $portRoot 'Kind' 'card'
+    Set-MockProperty $rerouteEdge 'AvId' 'refresh-edge'
+    Set-MockProperty $rerouteEdge 'SourceId' 'wide-service'
+    Set-MockProperty $rerouteEdge 'SourceSide' 'bottom'
+    Set-MockProperty $rerouteEdge 'SourcePosition' '0.15'
+    $rerouteEdge.CellMap.BeginX | Add-Member NoteProperty GluedTo $null
+    $rerouteEdge.CellMap.BeginX | Add-Member ScriptMethod GlueTo {param($target) $this.GluedTo=$target}
+    $rerouteEdge.Connects=New-MockCollection @([pscustomobject]@{FromCell=[pscustomobject]@{Name='BeginX'};ToSheet=$portRoot})
+    $reroutePage.Shapes=New-MockCollection @($portRoot,$rerouteEdge)
+    Complete-NativeRouting $rerouteDocument -Force
+    Assert ($rerouteEdge.CellMap.BeginX.GluedTo.OwnerId -eq $portRoot.ID -and
+        $portRoot.CellMap['Connections.AvPortbottom0_15.X'].FormulaU -like '*0.15*' -and
+        $portRoot.CellMap['Connections.AvPortbottom0_15.DirY'].FormulaU -eq '1') 'Final rerouting refreshes measured noncentral caption ports and inward vectors after caption edits without changing the full service glue.'
+    $rerouteEdge.Connects=New-MockCollection @([pscustomobject]@{FromCell=[pscustomobject]@{Name='BeginX'};ToSheet=$rerouteNode})
+    Assert-Throws { Complete-NativeRouting $rerouteDocument -Force } '*actual full-service glue differs from its declared endpoint*'
+    $checks.Add('Caption-port refresh preserves noncentral positions/full-group identity and rejects stale or incorrect endpoint glue before rerouting.')
+    $policyDocument=New-MockPackDocument $pack
+    Set-MockProperty $policyDocument.DocumentSheet 'RoutingPolicy' 'orthogonal-v1.6'
+    Assert-Throws { Export-Model $policyDocument } '*Native architecture routing validation failed*RouteGeometryUnavailable*'
+    $flowPolicy=New-MockPackDocument $pack
+    Set-MockProperty $flowPolicy.DocumentSheet 'RoutingPolicy' 'orthogonal-v1.6'
+    $flowPolicy.Pages.Item(1).Shapes=New-MockCollection @($flowPolicy.Pages.Item(1).Shapes.Entries | Where-Object {-not $_.OneD})
+    Assert-Throws { Export-Model $flowPolicy } '*Main flowchart*RouteGeometryUnavailable*'
+    $policyDocument.DocumentSheet.CellMap.Remove('Prop.RoutingPolicy')
+    Assert ((Export-Model $policyDocument).pages.Count -eq 3) 'Existing documents without the new routing policy remain readable/exportable; new-policy documents cannot silently pass unknown actual geometry.'
+    $checks.Add('Connector-only final rerouting preserves node placement, clears curved/diagonal routing settings, never invokes page-wide layout from an empty selection, and enforces actual routing on flowchart/notes pages too.')
 } finally {
     Remove-Item -LiteralPath $fixtures -Recurse -Force
 }
@@ -556,7 +1090,7 @@ if ($EnterpriseOnly) {
     }
     $enterprise | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $enterprisePath -Encoding UTF8
     Assert (Run-Helper @{Action='Validate';ModelPath=$enterprisePath}).valid 'Enterprise style and model validate before creation.'
-    [void](Run-Helper @{Action='New';ModelPath=$enterprisePath;DocumentPath=$drawing})
+    [void](Run-Helper @{Action='New';LegacyModel=$true;ModelPath=$enterprisePath;DocumentPath=$drawing})
     $document=Get-OpenDocument $drawing; $page=$document.Pages.Item(1)
     $snapshot=Run-Helper @{Action='Inspect';DocumentPath=$drawing}; $pageId=$snapshot.pages[0].pageId
     $otherProfile=$enterprise | ConvertTo-Json -Depth 20 | ConvertFrom-Json
@@ -573,7 +1107,7 @@ if ($EnterpriseOnly) {
     $iconLink=$page.Shapes.ItemU('av-flow-B')
     $expectedX=$node.CellsU('PinX').ResultIU-$node.CellsU('Width').ResultIU/2+$glyph.CellsU('PinX').ResultIU+$glyph.CellsU('Width').ResultIU/2
     Assert ([Math]::Abs($iconLink.CellsU('BeginX').ResultIU-$expectedX) -lt 0.001) 'Horizontal links terminate at visible glyph bounds while remaining attached to the full semantic node.'
-    Assert ($iconLink.CellsU('ShapeRouteStyle').ResultIU -eq 2) 'Aligned icon interactions use straight routes, avoiding invisible-anchor detours.'
+    Assert ($iconLink.CellsU('ShapeRouteStyle').ResultIU -eq 1) 'Icon interactions use the v1.6 right-angle route policy.'
     Assert ((Get-FileHash -LiteralPath $svgPath -Algorithm SHA256).Hash -ieq $svgEntry.sha256) 'Source SVG bytes remain unchanged.'
     $caption.NameU='caption-renamed-manually'; [void]$document.Save()
     foreach ($edge in @($snapshot.pages[0].shapes | Where-Object {$_.kind -eq 'edge'})) { Assert ($edge.connections -ge 2) 'Enterprise connectors glue to full native semantic nodes.' }
@@ -586,11 +1120,11 @@ if ($EnterpriseOnly) {
         @{schemaVersion=1;updates=@(@{pageId=$pageId;shapeId=$Id;set=$Set})} | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $changesFile -Encoding UTF8
         [void](Run-Helper @{Action='Update';DocumentPath=$drawing;ChangesPath=$changesFile})
     }
-    $canonical=[string]$node.Text
+    $canonical=[string]$node.Characters.Text
     Enterprise-Update 'service-A' @{displayLabel="Visible`ninstance A";details='Updated native-only notes'}
-    Assert ($node.Text -ceq $canonical -and $caption.Text -eq "Visible`ninstance A") 'Caption-only update preserves all canonical text despite manual caption renaming.'
+    Assert ($node.Characters.Text -ceq $canonical -and $caption.Text -eq "Visible`ninstance A") 'Caption-only update preserves all canonical text despite manual caption renaming.'
     Enterprise-Update 'service-A' @{label="Service A`nUpdated full source semantics."}
-    Assert ($caption.Text -eq 'Service A' -and (Read-Property $node 'FullLabel') -eq $node.Text) 'Label update resets caption to its first line and refreshes canonical metadata.'
+    Assert ($caption.Text -eq 'Service A' -and (Read-Property $node 'FullLabel') -eq $node.Characters.Text) 'Label update resets caption to its first line and refreshes canonical metadata.'
     Enterprise-Update 'service-A' @{label="Canonical A`nFull retained narrative.";displayLabel='Explicit caption'}
     Assert ($caption.Text -eq 'Explicit caption') 'Explicit displayLabel wins over first-line default in a combined update.'
     Enterprise-Update 'service-A' @{x=5.4}
@@ -599,7 +1133,7 @@ if ($EnterpriseOnly) {
     [void](Run-Helper @{Action='Rename';DocumentPath=$drawing;ComponentId='service-A';Label="Renamed A`nCanonical rename detail."})
     Assert ($caption.Text -eq 'Renamed A') 'Rename resets visible caption instead of silently editing only hidden semantics.'
     Enterprise-Update 'select' @{displayLabel='Select target'}
-    Assert ($page.Shapes.ItemU('av-select').Text -like "Select destination*Full functional*") 'Borderless label card retains source semantics during caption-only updates.'
+    Assert ($page.Shapes.ItemU('av-select').Characters.Text -like "Select destination*Full functional*") 'Borderless label card retains source semantics during caption-only updates.'
     $location=$document.FullName; [void]$document.Close(); $document=$app.Documents.Open($location)
     $exportPath=Join-Path $OutputDirectory 'enterprise-roundtrip.json'
     [void](Run-Helper @{Action='ExportModel';DocumentPath=$drawing;ModelPath=$exportPath})
@@ -608,7 +1142,7 @@ if ($EnterpriseOnly) {
     $exportNode=@($exported.pages[0].nodes | Where-Object {$_.id -eq 'service-A'})[0]
     Assert ($exportNode.displayLabel -eq 'Renamed A' -and $exportNode.details -eq 'Updated native-only notes' -and $exportNode.sourceId -eq 'source-A' -and $exportNode.iconSize -eq 0.72) 'Export retains actual caption, notes, source identity, and iconSize.'
     $clonePath=Join-Path $OutputDirectory 'Enterprise-Clone.vsdx'
-    [void](Run-Helper @{Action='New';DocumentPath=$clonePath;ModelPath=$exportPath})
+    [void](Run-Helper @{Action='New';LegacyModel=$true;DocumentPath=$clonePath;ModelPath=$exportPath})
     $clone=Run-Helper @{Action='Inspect';DocumentPath=$clonePath}
     $cloneNode=@($clone.pages[0].shapes | Where-Object {$_.id -eq 'service-A'})[0]
     Assert ($cloneNode.label -eq $exportNode.label -and $cloneNode.displayLabel -eq $exportNode.displayLabel -and $cloneNode.details -eq $exportNode.details -and $cloneNode.sourceId -eq 'source-A' -and $clone.presentationProfile -eq 'enterprise') 'New clone preserves canonical and visual semantics.'
@@ -632,7 +1166,7 @@ if ($CrudOnly) {
     function Crud-Snapshot { return Run-Helper @{Action='Inspect';DocumentPath=$drawing} }
     $preflight=Run-Helper @{Action='Check';ModelPath=$crudModelPath}
     Assert ($preflight.ready -and $preflight.requiredOnly -and $preflight.azureMastersVerified -eq 0 -and $preflight.iconRefsVerified -contains $svgEntry.id) 'Model Check requires only the container master and selected SVG, not all Azure stencils.'
-    [void](Run-Helper @{Action='New';ModelPath=$crudModelPath;DocumentPath=$drawing})
+    [void](Run-Helper @{Action='New';LegacyModel=$true;ModelPath=$crudModelPath;DocumentPath=$drawing})
     $document=Get-OpenDocument $drawing
     Assert ($null -ne $document) 'Own CRUD drawing resolves by exact path.'
     $initial=Crud-Snapshot
@@ -723,7 +1257,7 @@ if ($CrudOnly) {
     Assert (Run-Helper @{Action='Validate';ModelPath=$modelExport}).valid 'Live exported model validates without COM.'
     $exported=Get-Content -LiteralPath $modelExport -Raw | ConvertFrom-Json
     $clonePath=Join-Path $OutputDirectory ('AI-Roundtrip-'+[guid]::NewGuid().ToString('N')+'.vsdx')
-    [void](Run-Helper @{Action='New';ModelPath=$modelExport;DocumentPath=$clonePath})
+    [void](Run-Helper @{Action='New';LegacyModel=$true;ModelPath=$modelExport;DocumentPath=$clonePath})
     $clone=Run-Helper @{Action='Inspect';DocumentPath=$clonePath}
     Assert ($clone.pages[0].shapes.Count -eq $persisted.pages[0].shapes.Count) 'Clone preserves graph size.'
     foreach ($shape in $persisted.pages[0].shapes) {
@@ -813,7 +1347,7 @@ function Assert-Graph($Snapshot, $Model) {
     }
 }
 
-[void](Run-Helper @{Action='New'; ModelPath=$baseline; DocumentPath=$drawing})
+[void](Run-Helper @{Action='New'; LegacyModel=$true; ModelPath=$baseline; DocumentPath=$drawing})
 $model2 = Get-Content -LiteralPath $baseline -Raw | ConvertFrom-Json
 Assert-Graph (Snapshot) $model2
 $checks.Add('Created five pages with native containers, metadata, layers and glued connectors.')
@@ -874,7 +1408,7 @@ if (-not $document.Saved) { [void]$document.Save() }
 $checks.Add('A partially applied invalid request rolls back rather than leaving changes.')
 
 $blocked = $false
-try { [void](Run-Helper @{Action='New'; ModelPath=$baseline; DocumentPath=$drawing}) }
+try { [void](Run-Helper @{Action='New'; LegacyModel=$true; ModelPath=$baseline; DocumentPath=$drawing}) }
 catch [System.Management.Automation.RuntimeException] {
     if ($_.Exception.Message -notlike '*Refusing to overwrite*') { throw }
     $blocked = $true

@@ -1,0 +1,5 @@
+# Python 3.10+; no Microsoft Office, COM, browser, or remote rendering service.
+# resvg's cross-platform wheel preserves SVG gradients when producing PNG glyphs.
+reportlab>=4.4,<5
+resvg-py>=0.2,<1
+Pillow>=11,<13

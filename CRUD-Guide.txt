@@ -1,5 +1,5 @@
 NATIVE VISIO CRUD AND SEMANTIC ROUNDTRIP
-Version 1.5
+Version 1.6
 
 All commands use the resolved AzureVisio.ps1 beside this file.
 Use Windows PowerShell 5.1, an interactive Visio desktop session, and absolute
@@ -11,6 +11,23 @@ Capture successful JSON internally and show concise outcomes, not raw dumps.
 Deletion previews/approval and real errors must not be hidden by quiet mode.
 
 CREATE
+New requires outputContract=architecture-pack-v1.6 by default. Exactly three
+pages have view=main, hardening, flowchart in that order. Model hardening is
+{status:"proposed"|"already-enterprise"|"not-applicable",reason:"..."}.
+The main role is diagram; hardening is diagram only for proposed, otherwise
+notes; flowchart is notes. Both .vsdx and matching three-page .pdf are required
+skill deliverables. -LegacyModel is an explicit compatibility opt-in for old
+models, not an ordinary authoring default.
+
+Flowchart cards use standard/detail styles with descriptive visible labels
+and mainNodeIds/mainEdgeIds arrays that collectively cover every page-1 card
+and edge. References to nonexistent or hardening-only items are rejected.
+The final page includes a connected flowchart and a visible narrative note.
+Non-proposed hardening pages explain the applicability decision in prose.
+Inspection/model export retain outputContract, hardening, view, and trace IDs.
+Pack merges cannot add a fourth page, replace page identities, or downgrade the
+contract. Pack edits and exports recheck its structural/content contract.
+
 For new enterprise architecture or an authorized restyle, use model
 presentationProfile=enterprise. The Enterprise-Style gate runs before COM.
 Reference/legacy profiles preserve older literal rendering behavior.
@@ -50,6 +67,13 @@ manual routing, styling, all layers, and unsupported Shape Data are not
 reproduced exactly. Keep the original .vsdx for visual fidelity.
 Unattached/ambiguous/subshape endpoints remain null with native evidence and
 coordinates. They are never silently connected to a nearby component.
+Inspect also reports actual connector routeGeometry in page-coordinate inches,
+including horizontal/vertical/diagonal/curved segments. pages[].routing reports
+endpoint identity, visible glyph/caption attachment, and route obstructions.
+For new orthogonal packs, require routing.valid on every page before delivery.
+Caption-bottom ports are identified as caption attachments, not glyph attachments.
+Portable-generated boundaries retain validated semantic ParentId hierarchy and
+explicit warnings; they are not falsely reported as native Visio containers.
 
 UPDATE
 Update -DocumentPath <drawing.vsdx> -ChangesPath <changes.json>
@@ -75,13 +99,16 @@ custom colors are preserved. Set direction/dashed explicitly when needed.
 Icon/label styles also support displayLabel and details updates. displayLabel
 changes only the visible caption; label changes canonical text and resets the
 caption to the first line unless displayLabel is supplied in the same update.
-Rename likewise updates the visible caption. Full text remains in root.Text
+Rename likewise updates the visible caption. Full text remains in the group's own text
 (hidden in icon/label mode) and FullLabel Shape Data; details remain native data.
+Canonical group text is accessed through root.Characters.Text because Visio's
+root.Text can proxy a caption child in portable groups. Inspection and export
+read the actual own-group text rather than substituting caption or metadata.
 Duplicate targets, unknown fields, invalid bounds, locked shapes, unresolved
 targets, and invalid endpoint types fail before applying the batch.
 Changes are grouped in a Visio undo scope; errors are surfaced, not skipped.
 
-Version 1.5 does not replace icons, modify parent/layer membership, or edit
+Version 1.6 does not replace icons, modify parent/layer membership, or edit
 arbitrary internal subshapes through Update. Rotated/non-center-pinned geometry
 and geometry of nonempty containers are blocked to avoid collateral layout.
 For such changes, explain the limitation and agree on a native working-copy
@@ -128,7 +155,8 @@ presentationProfile is enterprise, reference, or legacy. Enterprise defaults
 cards with icons to icon style and generic functions to label style.
 Pages role=diagram (default) use the presentation gate; role=notes is for
 companion explanations, not a way to exempt the primary architecture.
-Node kinds: card, container, note. The page set is arbitrary, not fixed at five.
+Node kinds: card, container, note. New packs are fixed at three pages. Legacy
+inspection and explicitly requested legacy creation preserve the old page set.
 Optional iconRef is a catalog ID and is exclusive with builtin icon.
 cardStyle=icon creates a transparent native anchor, original glyph and caption,
 with no visible service-card box. displayLabel is the short visible caption;
@@ -145,6 +173,8 @@ retain boundary style/type/fill/color and full scope details.
 SVG artwork is imported through Visio, aspect-fitted, and grouped with a card.
 Optional node/edge sourceRef:string, requirementIds:string[], state:string,
 purpose:string, confidence:High/Medium/Low/Unknown or number 0..1.
+Flowchart card mainNodeIds:string[] and mainEdgeIds:string[] are page-1 trace
+references, not a second interpretation of the proposed hardening architecture.
 Optional sourceId is the independent source-contract component/relationship ID.
 It is retained by Inspect and ExportModel; it is not an arbitrary explanation
 that can replace a missing source item.
@@ -158,11 +188,12 @@ for left/right sides, left-to-right for top/bottom sides. Default 0.5 is unchang
 For icon nodes, left/right/top ports follow the visible glyph while remaining
 glued to the full semantic group. Bottom ports stay below the caption to avoid
 cutting a vertical connector through its text.
-Optional edge routeStyle=straight or orthogonal selects the routing grammar.
-Aligned opposite-side icon/label interactions default to straight; other new
-connections and legacy cards retain orthogonal routing. Update and ExportModel
-preserve explicit routing styles. Use straight for radial/direct relationships
-and orthogonal for deliberate shared gutters, not a universal one-size layout.
+Use edge routeStyle=orthogonal for new skill output. Horizontal or vertical direct
+segments are acceptable; diagonal segments and shortcuts are not. Choose explicit
+ports and clear gutters so the line reaches its actual source and target without
+passing through unrelated icons or captions. Legacy straight routing remains
+readable for existing drawings, not an authoring default. Inspect actual geometry
+and endpoint glue after rendering; the routing setting alone is insufficient.
 Unknown direction cannot be represented as a confident direction. Resolve it
 or deliberately draw and label an uncertain association with evidence retained.
 Optional page footer:string/null/false. furniture:false suppresses default

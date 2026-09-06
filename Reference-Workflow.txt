@@ -1,5 +1,5 @@
 REFERENCE PRESERVATION AND RESUMABLE CONVERSION
-Version 1.5
+Version 1.6
 
 Apply Quiet-Workflow.txt: keep extraction inventories/contracts and routine
 research out of the main chat. Do the checks in task context, while surfacing
@@ -34,12 +34,17 @@ Keep these roles in the task's persisted source record. Do not infer that a
 later attachment replaces an earlier source when the user calls it failed output.
 
 DEFAULT FOR MIXED REQUESTS
-"Convert this reference and produce a best-practice draft" means two deliverables:
-1. A first, source-faithful reference view preserving content and macro layout.
-2. A separately named proposed view, only if requested, with documented changes.
+New v1.6 conversions produce one three-page VSDX and its matching PDF:
+1. A first, source-faithful main view preserving content and macro layout.
+2. A separately named proposed hardening view when applicable and not already
+   required/present; otherwise a substantive hardening applicability review.
+3. A text-rich flowchart and explanation of the source/main view only.
+The source contract must designate page 1 and allow the companion pages.
+Do not silently change an existing source contract that prohibits extra pages;
+surface the conflict. Existing drawings are not repaginated by targeted edits.
 It does NOT authorize silently replacing the reference, renaming its services,
 dropping layers, or introducing custom adapters into the reference view.
-Present the reference preview first. Do not label a proposal as the conversion.
+Present the reference/main view first. Do not label a proposal as the conversion.
 If the user explicitly wants only a redesign, record that decision and use
 new-design mode; do not silently switch modes after a resumed conversation.
 
