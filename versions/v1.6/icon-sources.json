@@ -1,0 +1,44 @@
+[
+  {
+    "id": "azure",
+    "name": "Azure architecture icons, V24",
+    "sourcePage": "https://learn.microsoft.com/en-us/azure/architecture/icons/",
+    "downloadUrl": "https://arch-center.azureedge.net/icons/Azure_Public_Service_Icons_V24.zip",
+    "status": "Current published package, July 2026"
+  },
+  {
+    "id": "microsoft365",
+    "name": "Microsoft 365 architecture icons",
+    "sourcePage": "https://learn.microsoft.com/en-us/previous-versions/microsoft-365/solutions/architecture-icons-templates",
+    "downloadUrl": "https://go.microsoft.com/fwlink/?linkid=869455",
+    "status": "Official archived documentation; older artwork, not a guarantee of current branding"
+  },
+  {
+    "id": "fabric",
+    "name": "Microsoft Fabric product, experience, and item icons",
+    "sourcePage": "https://learn.microsoft.com/en-us/fabric/fundamentals/icons",
+    "downloadUrl": "https://raw.githubusercontent.com/microsoft/fabric-samples/main/docs-samples/Icons.zip",
+    "status": "Official repository linked by Microsoft Learn"
+  },
+  {
+    "id": "entra",
+    "name": "Microsoft Entra architecture icons",
+    "sourcePage": "https://learn.microsoft.com/en-us/entra/architecture/architecture-icons",
+    "downloadUrl": "https://download.microsoft.com/download/3/1/a/31a56038-856a-4489-88e4-ee5a1c4352be/Microsoft%20Entra%20architecture%20icons%20-%20Oct%202023.zip",
+    "status": "Published October 2023 package; includes branding guidance"
+  },
+  {
+    "id": "power-platform",
+    "name": "Microsoft Power Platform icons",
+    "sourcePage": "https://learn.microsoft.com/en-us/power-platform/guidance/icons",
+    "downloadUrl": "https://download.microsoft.com/download/498606aa-6d27-4f13-aa5c-1401078c153b/Power-Platform-icons-scalable.zip",
+    "status": "Published December 2025 package, including Microsoft Agent 365 and Copilot Studio"
+  },
+  {
+    "id": "dynamics365",
+    "name": "Microsoft Dynamics 365 icons",
+    "sourcePage": "https://learn.microsoft.com/en-us/dynamics365/get-started/icons",
+    "downloadUrl": "https://download.microsoft.com/download/498606aa-6d27-4f13-aa5c-1401078c153b/Dynamics-365-icons-scalable.zip",
+    "status": "Published February 2026 package"
+  }
+]

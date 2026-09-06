@@ -1,51 +1,41 @@
 # Azure Visio Skill
 
-Create editable Azure architecture diagrams and PDFs with **Microsoft Scout or Copilot Cowork**. Version 1.6 produces a three-page pack: the requested main architecture, a conditional enterprise-hardening proposal or applicability review, and a detailed flowchart/write-up of the main architecture.
+Create editable Azure architecture **Visio + PDF** files with Scout or Copilot Cowork. Each v1.6 pack has three pages: **main architecture**, **conditional enterprise hardening/review**, and **detailed main-flow explanation**.
 
-**Scout uses desktop Visio. Cowork generates `.vsdx` and `.pdf` directly with the bundled Python renderer, without a Scout handoff.** Cowork must expose permitted Python execution, dependencies, and downloadable artifacts. The skill cannot grant missing host capabilities. This is an independent skill, not an official Microsoft or GitHub product.
+**[Download v1.6 ZIP](versions/v1.6/dist/azure-visio-1.6.0.zip)** | [v1.6 files](versions/v1.6/) | [v1.5 archive](versions/v1.5/)
 
-## Install in Scout
+Code, guides, tests, downloads, and screenshots are grouped inside each version folder.
 
-1. Install and activate a licensed **desktop Visio** application on Windows. Visio for the web alone is insufficient.
-2. Download [the skill ZIP](dist/azure-visio-1.6.0.zip) and extract it to a local folder outside OneDrive. Keep `SKILL.md` and all companion files together.
-3. In Scout, ask:
+## Install
 
-   > Install azure-visio from [extracted folder path]. Register SKILL.md with your skill-management tools, copy every companion file into the skill's resource directory, and complete the official icon-library and reference-atlas setup under their published terms. Preserve existing settings and respect company policy.
+**Scout:** Requires licensed desktop Visio on Windows. Extract the ZIP, keep its files together, and ask:
 
-4. Approve any required local file/shell access, then start a **new Scout chat**.
-5. Try:
+> Install azure-visio from [folder]. Register SKILL.md and all companion files, and complete the official icon setup.
 
-   > /azure-visio Create an Azure architecture with App Service and Azure SQL. Deliver a three-page Visio and PDF: main architecture, conditional enterprise hardening or review, and a detailed flowchart/write-up of the main architecture.
+**Cowork:** Open **Customize** (sidebar or **+**) > **Skills > Add > Upload skill** and upload the v1.6 ZIP, not GitHub's source archive. Cowork creates the files directly with Python, **without a Scout handoff**. Skill upload, Python/dependencies, and file downloads must be allowed by your organization's rollout and policy.
 
-Visio opens automatically. Deletion, destructive replacement, and external sharing still require confirmation.
+Start a **new chat/task** after installation.
 
-## Install in Copilot Cowork
+## Try it
 
-1. Open Cowork with an account that has access.
-2. Where custom-skill upload is available, open **Customize** from the left navigation or **+** menu, then **Skills > Add dropdown > Upload skill**.
-3. Upload [the skill ZIP](dist/azure-visio-1.6.0.zip), not GitHub's **Code > Download ZIP** archive.
-4. Start a new task: **"Use azure-visio to create this architecture. Run the portable renderer here and deliver actual three-page Visio and PDF files. Do not create a Scout handoff."**
-5. Permit the required code execution and dependency/icon access under your organization's policies. Download the finished `.vsdx` and `.pdf` from that task.
+> Use azure-visio to draw [your requirements]. Deliver the three-page editable Visio and PDF. Use official icons and right-angle connectors. In Cowork, finish here without a Scout handoff.
 
-If **Customize**, **Upload skill**, Python execution, or downloadable output is missing, availability depends on your Cowork interface and organization. Ask your administrator; do not bypass policy. Portable file creation does not provide desktop Visio control.
+[Setup and commands](versions/v1.6/README.txt) | [Editing guide](versions/v1.6/CRUD-Guide.txt)
 
-## Three-page behavior
+## Three-page example
 
-Page 1 preserves the requested architecture. Page 2 proposes additional enterprise controls only when applicable and not already present or requested; otherwise it documents the hardening review without inventing a second design. Page 3 is a connected, text-rich flowchart and visible explanation of **page 1**, with component and relationship traceability.
+Synthetic RAG assistant generated with v1.6; illustrative, not a deployment or security certification.
 
-Connections use only horizontal and vertical segments with right-angle bends. Each line attaches to its intended service, with clear return and control paths rather than diagonal shortcuts through unrelated icons or captions.
+### 1. Main architecture
 
-## Sample architecture images
+![Main RAG architecture](versions/v1.6/examples/images/architecture-main.png)
 
-- [Icon-first deployment architecture](examples/images/deployment-architecture.png)
-- [Generic hub-and-spoke topology, legacy reference demo](examples/images/hub-spoke-reference.png)
+### 2. Enterprise-hardening proposal
 
-![Icon-first deployment architecture](examples/images/deployment-architecture.png)
+![Separately proposed enterprise hardening](versions/v1.6/examples/images/architecture-hardening.png)
 
-These are illustrative outputs, not proof of deployment, security, or production readiness.
+### 3. Main-flow explanation
 
-## More information
+![Detailed main-flow explanation](versions/v1.6/examples/images/architecture-flow.png)
 
-See [README.txt](README.txt) for manual setup and [CRUD-Guide.txt](CRUD-Guide.txt) for commands and limitations.
-
-Product names, trademarks, and imagery remain their respective owners' property. Microsoft icons and reference downloads retain their [published usage terms](https://learn.microsoft.com/en-us/azure/architecture/icons/). Downloaded libraries, private configuration, customer source files, and native working drawings are not bundled in this repository.
+Independent project, not an official Microsoft or GitHub product. Microsoft icons retain their [published terms](https://learn.microsoft.com/en-us/azure/architecture/icons/).

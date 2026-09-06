@@ -5,8 +5,6 @@ environment.json
 !.env.example
 .scout/
 .copilot/
-__pycache__/
-*.py[cod]
 
 # Downloaded libraries and private working artifacts
 IconLibrary/
@@ -25,4 +23,5 @@ Sources/
 
 # Only the curated distributable belongs in source control
 *.zip
-!versions/*/dist/*.zip
+!dist/
+!dist/*.zip

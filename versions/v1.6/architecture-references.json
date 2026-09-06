@@ -1,0 +1,198 @@
+{
+  "catalogVersion": 2,
+  "reviewed": "2026-09-05",
+  "browseUrl": "https://learn.microsoft.com/en-us/azure/architecture/browse/",
+  "selectionRule": "Read the matching full article, compare fit and exclusions with the user's requirements, and explain adaptations. This is a starter index, not a fixed list of allowed architectures or proof of compatibility.",
+  "architectures": [
+    {
+      "id": "web-poc",
+      "title": "Basic Web Application",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/web-apps/app-service/architectures/basic-web-app",
+      "type": "Reference architecture",
+      "fit": "Single-region proof of concept or learning application using App Service and SQL Database.",
+      "exclusions": "Explicitly not a production baseline. Does not establish private networking, WAF, autoscaling, or zone redundancy."
+    },
+    {
+      "id": "web-baseline",
+      "title": "Baseline Highly Available Zone-Redundant App Services Web Application",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/web-apps/app-service/architectures/baseline-zone-redundant",
+      "type": "Reference architecture",
+      "fit": "Regional highly available web application needing private dependency access.",
+      "exclusions": "Requires supported regions/configuration. Regional redundancy is not multi-region disaster recovery. Ingress and outbound integration have different paths."
+    },
+    {
+      "id": "container-apps",
+      "title": "Deploy Microservices to Azure Container Apps",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/serverless/microservices-with-container-apps",
+      "type": "Example scenario",
+      "fit": "Brownfield microservices migration from Kubernetes with less orchestration management.",
+      "exclusions": "Migration compromises are not universal greenfield recommendations. Validate cost, ingress, identity, and message compatibility."
+    },
+    {
+      "id": "async-integration",
+      "title": "Use a Message Broker and Events to Integrate Enterprise Systems",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/integration/queues-events",
+      "type": "Example scenario",
+      "fit": "Asynchronous integration, burst buffering, unreliable back ends, and long-running workflows.",
+      "exclusions": "Queue messages and event notifications are different. Private endpoint and topic support depends on Service Bus tier."
+    },
+    {
+      "id": "foundry-chat",
+      "title": "Baseline Microsoft Foundry Chat Reference Architecture",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/baseline-microsoft-foundry-chat",
+      "type": "Reference architecture",
+      "fit": "Network-secured enterprise chat/agent workload with enterprise grounding.",
+      "exclusions": "Not proof that every IQ, model family, or Fabric/M365 source plugs into one chain. Validate agent setup, model/tool/region support, state resources, and identity."
+    },
+    {
+      "id": "fabric-lakehouse",
+      "title": "Greenfield Lakehouse on Microsoft Fabric",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/data/greenfield-lakehouse-fabric",
+      "type": "Reference architecture",
+      "fit": "New batch/streaming analytics platform with OneLake, Spark, data science, and reporting.",
+      "exclusions": "Not recommended unchanged for legacy warehouse migration or SQL-focused teams with little Spark expertise. Capacity and permissions are separate decisions."
+    },
+    {
+      "id": "hub-spoke",
+      "title": "Hub-Spoke Network Topology in Azure",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/hub-spoke",
+      "type": "Reference architecture",
+      "fit": "Shared regional networking/security, workload isolation, and explicitly required hybrid connectivity.",
+      "exclusions": "Customer-managed hub, not Virtual WAN. Peering is nontransitive. Do not add hub/spoke infrastructure to unrelated app or data sketches."
+    }
+  ],
+  "serviceReferences": [
+    {
+      "topic": "Diagram purpose, boundaries, and notation",
+      "url": "https://learn.microsoft.com/en-us/azure/well-architected/architect-role/design-diagrams"
+    },
+    {
+      "topic": "Microsoft Foundry naming and scope",
+      "url": "https://learn.microsoft.com/en-us/azure/foundry/what-is-foundry"
+    },
+    {
+      "topic": "Foundry IQ knowledge, Search, Fabric IQ, and Work IQ relationships",
+      "url": "https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq"
+    },
+    {
+      "topic": "Work IQ",
+      "url": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/"
+    },
+    {
+      "topic": "Fabric IQ",
+      "url": "https://learn.microsoft.com/en-us/fabric/iq/overview"
+    },
+    {
+      "topic": "Agentic versus classic retrieval",
+      "url": "https://learn.microsoft.com/en-us/azure/search/agentic-retrieval-overview"
+    },
+    {
+      "topic": "Remote versus indexed knowledge sources",
+      "url": "https://learn.microsoft.com/en-us/azure/search/agentic-knowledge-source-overview"
+    },
+    {
+      "topic": "Classic prompt flow lifecycle",
+      "url": "https://learn.microsoft.com/en-us/azure/foundry-classic/concepts/prompt-flow"
+    }
+  ],
+  "visualReferences": [
+    {
+      "id": "ibm-maximo",
+      "title": "Deploy IBM Maximo Application Suite on Azure",
+      "archetype": "deployment",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/apps/deploy-ibm-maximo-application-suite",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/apps/media/deploy-ibm-maximo-application-suite-architecture.svg",
+      "lessons": ["Nested deployment scopes, not process cards", "Icons represent resources", "Control-plane and worker subnets remain distinct"]
+    },
+    {
+      "id": "virtual-wan",
+      "title": "Hub-Spoke Network Topology Using Azure Virtual WAN",
+      "archetype": "network",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/hub-spoke-virtual-wan-architecture",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/networking/architecture/_images/hub-spoke-virtual-wan-architecture-1.svg",
+      "lessons": ["Hub-centered topology instead of linear steps", "Named connections and routing annotations", "Differentiate hubs, spokes, and inter-hub links"]
+    },
+    {
+      "id": "m365-dev-ops",
+      "title": "Manage Microsoft 365 Tenant Configuration with Azure DevOps",
+      "archetype": "deployment-lifecycle",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/devops/manage-microsoft-365-tenant-configuration-microsoft365dsc-devops",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/devops/media/manage-microsoft-365-tenant-configuration-microsoft365dsc-azure-devops.svg",
+      "vsdx": "https://arch-center.azureedge.net/m365-dev-ops.vsdx",
+      "lessons": ["Freestanding repository, pipeline and tenant glyphs", "Numbered activities with companion explanations", "Separate staging and production branches"]
+    },
+    {
+      "id": "ase-high-availability",
+      "title": "High Availability Enterprise Deployment with App Service Environment",
+      "archetype": "high-availability",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/web-apps/app-service-environment/architectures/app-service-environment-high-availability-deployment",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/web-apps/app-service-environment/_images/app-service-environment-high-availability.svg",
+      "vsdx": "https://arch-center.azureedge.net/app-service-environment-high-availability.vsdx",
+      "lessons": ["Subnet containment conveys deployment", "Web/API/function roles are not separate regions", "Private endpoints differ from external managed services"]
+    },
+    {
+      "id": "write-through-cache",
+      "title": "Write-Through Caching with Azure Managed Redis and Azure SQL Database",
+      "archetype": "application-dataflow",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/write-through-caching-azure-sql-managed-redis",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/_images/write-through-caching-functions-azure-sql-managed-redis.svg",
+      "vsdx": "https://arch-center.azureedge.net/write-through-caching-functions-azure-sql-managed-redis.vsdx",
+      "lessons": ["Separate read and write paths", "Numbered interaction markers", "Metrics/logs use a distinct secondary connection style"]
+    },
+    {
+      "id": "sap-bw4hana",
+      "title": "Run SAP BW/4HANA with Linux Virtual Machines",
+      "archetype": "hybrid-deployment",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/sap/run-sap-bw4hana-with-linux-virtual-machines",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/sap/images/sap-bw4hana.svg",
+      "vsdx": "https://arch-center.azureedge.net/sap-bw4hana.vsdx",
+      "lessons": ["Hub and workload ownership are distinct", "Tier subnets and server pools communicate structure", "No paragraph-filled service boxes"]
+    },
+    {
+      "id": "aks-agc",
+      "title": "Application Gateway for Containers with Multitenant AKS",
+      "archetype": "network-application",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/aks-agic/aks-agc",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/aks-agic/media/aks-agc-architecture.svg",
+      "vsdx": "https://arch-center.azureedge.net/aks-agc-multitenant.vsdx",
+      "lessons": ["DNS above, workload subnets centrally, supporting services below", "Connector colors have an explicit legend", "Cluster and tenant boundaries convey isolation"]
+    },
+    {
+      "id": "mainframe-data",
+      "title": "Modernize Mainframe and Midrange Data",
+      "archetype": "migration-dataflow",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/mainframe/modernize-mainframe-data-to-azure",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/example-scenario/mainframe/media/modernize-mainframe-data-azure.svg",
+      "vsdx": "https://arch-center.azureedge.net/modernize-mainframe-data-azure.vsdx",
+      "lessons": ["Explicit on-premises/Azure divider", "Separate conversion from ingestion/transformation", "Destination services grouped by role"]
+    },
+    {
+      "id": "foundry-baseline",
+      "title": "Baseline Microsoft Foundry Chat",
+      "archetype": "application-deployment",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/baseline-microsoft-foundry-chat",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/_images/baseline-microsoft-foundry.svg",
+      "vsdx": "https://arch-center.azureedge.net/baseline-microsoft-foundry.vsdx",
+      "lessons": ["Numbered request flow over resource boundaries", "Foundry resource/project hierarchy is explicit", "Monitoring is separate from the primary request path"]
+    },
+    {
+      "id": "foundry-landing-zone",
+      "title": "Baseline Microsoft Foundry Chat in an Azure Landing Zone",
+      "archetype": "ownership-network",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/baseline-microsoft-foundry-landing-zone",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/architecture/_images/baseline-microsoft-foundry-landing-zone.svg",
+      "vsdx": "https://arch-center.azureedge.net/baseline-microsoft-foundry-landing-zone.vsdx",
+      "lessons": ["Separate application and platform subscriptions", "Understated color conveys ownership", "Shared services are not workload process stages"]
+    },
+    {
+      "id": "conversation-insights",
+      "title": "Build a Conversation Knowledge Mining Solution with Foundry Tools",
+      "archetype": "knowledge-dataflow",
+      "article": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/idea/unlock-insights-from-conversational-data",
+      "svg": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/idea/_images/unlock-insights-from-conversational-data.svg",
+      "vsdx": "https://arch-center.azureedge.net/unlock-insights-from-conversational-data.vsdx",
+      "lessons": ["Inputs, extraction/indexing, and exploration are distinct", "Service glyphs plus short functional captions", "Detailed explanations belong outside the main diagram"]
+    }
+  ],
+  "visualReferenceUse": "Curated design examples, not model-weight training or a deployment template. Study the matching archetype's visual grammar; do not import its services, regions, or topology into unrelated workloads. Downloaded originals remain separate from the skill ZIP with their source URLs and hashes."
+}

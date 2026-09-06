@@ -1,0 +1,178 @@
+NATIVE VISIO CRUD AND SEMANTIC ROUNDTRIP
+Version 1.5
+
+All commands use the resolved AzureVisio.ps1 beside this file.
+Use Windows PowerShell 5.1, an interactive Visio desktop session, and absolute
+Windows paths. No Azure deployments, file sharing, or automatic background
+desktop service is involved. Never change unrelated drawings or unsaved work.
+Native actions reuse or automatically open installed Visio; no opening question
+is needed. -NoLaunchVisio explicitly opts out. Validate/Catalog remain COM-free.
+Capture successful JSON internally and show concise outcomes, not raw dumps.
+Deletion previews/approval and real errors must not be hidden by quiet mode.
+
+CREATE
+For new enterprise architecture or an authorized restyle, use model
+presentationProfile=enterprise. The Enterprise-Style gate runs before COM.
+Reference/legacy profiles preserve older literal rendering behavior.
+Validate -ModelPath <model.json> runs without COM.
+For image/draft conversions, set conversionMode=faithful or reference-plus-proposal
+and referenceContract in the model, or pass -ReferencePath. The persisted source
+and content/layout contract are checked before drawing; missing sources do not
+fall back to a requirements-only design.
+Check -ModelPath <model.json> verifies only that model's native masters/icons.
+New -ModelPath <model.json> -DocumentPath <new.vsdx> creates a new drawing.
+Optional -IconDirectory points to a downloaded official icon library.
+Optional -OutputDirectory produces authorized PDF and PNG exports.
+New refuses overwrites. Merge with a model adds missing pages/nodes/edges only.
+Changing an existing model node does not update it through Merge; use Update.
+
+READ
+Inspect -DocumentPath <drawing.vsdx> returns JSON of actual open/saved state:
+pageId, page name, native visioId, managed AvId (id), geometry, label, layers,
+state, purpose, sourceRef, requirementIds, confidence, native membership,
+source/target IDs, direction, dash semantics, and actual connector-cell glue.
+The document's persisted referenceContract and conversionMode are also returned.
+Untagged groups include descendants and child labels. Managed icon internals
+are not promoted to independent service components.
+
+pageId is Visio's native page ID, NOT page number or an assumed zero-based index.
+Obtain IDs from Inspect immediately before constructing a change request.
+shapeId below refers to an AvId. visioId refers to the full native shape ID.
+Do not target by label alone or whichever drawing happens to be active.
+
+ExportModel -DocumentPath <drawing.vsdx> returns a reusable schemaVersion=1 model.
+Optional -ModelPath <new.json> writes it, refusing an existing destination.
+The destination's parent must exist. Respect classification and usage rights:
+do not export classified diagram content into unprotected JSON.
+Read the output warnings. Live geometry/glue take precedence over stale metadata.
+Arbitrary native groups become generic semantic cards; internal artwork,
+manual routing, styling, all layers, and unsupported Shape Data are not
+reproduced exactly. Keep the original .vsdx for visual fidelity.
+Unattached/ambiguous/subshape endpoints remain null with native evidence and
+coordinates. They are never silently connected to a nearby component.
+
+UPDATE
+Update -DocumentPath <drawing.vsdx> -ChangesPath <changes.json>
+Example (replace IDs with actual Inspect results):
+{
+  "schemaVersion": 1,
+  "updates": [
+    {"pageId":0,"shapeId":"web-app","set":{"label":"Customer portal","state":"Proposed"}},
+    {"pageId":0,"visioId":42,"set":{"x":6.5}},
+    {"pageId":0,"shapeId":"query-link","set":{"target":{"shapeId":"search"},"targetSide":"top","relationship":"query"}}
+  ]
+}
+
+Use exactly one shapeId or visioId per target. Targets are top-level full shapes.
+Endpoint references are on the same page and omit pageId.
+Supported set fields:
+- label, x, y, width, height.
+- state, purpose, sourceRef, requirementIds, confidence.
+- Connector source, target, sourceSide, targetSide, sourcePosition, targetPosition,
+  relationship, direction, dashed.
+Only specified properties change. Relationship changes metadata; existing
+custom colors are preserved. Set direction/dashed explicitly when needed.
+Icon/label styles also support displayLabel and details updates. displayLabel
+changes only the visible caption; label changes canonical text and resets the
+caption to the first line unless displayLabel is supplied in the same update.
+Rename likewise updates the visible caption. Full text remains in root.Text
+(hidden in icon/label mode) and FullLabel Shape Data; details remain native data.
+Duplicate targets, unknown fields, invalid bounds, locked shapes, unresolved
+targets, and invalid endpoint types fail before applying the batch.
+Changes are grouped in a Visio undo scope; errors are surfaced, not skipped.
+
+Version 1.5 does not replace icons, modify parent/layer membership, or edit
+arbitrary internal subshapes through Update. Rotated/non-center-pinned geometry
+and geometry of nonempty containers are blocked to avoid collateral layout.
+For such changes, explain the limitation and agree on a native working-copy
+workflow or an explicitly approved new model/version, never silent replacement.
+Icon groups can move, but width/height updates are blocked to prevent stretching
+the official artwork. Recompose a new approved model for icon layout resizing.
+Merge cannot switch an existing document's presentation profile or restyle its
+existing shapes; use an approved new drawing/working-copy model.
+
+DELETE: PREVIEW, APPROVAL, APPLY
+1. Prepare only the exact requested targets:
+   {"schemaVersion":1,"targets":[{"pageId":0,"shapeId":"obsolete-node"}]}
+2. Run Delete -DocumentPath <drawing.vsdx> -ChangesPath <request.json>
+   WITHOUT -ApplyDelete. This is preview-only.
+3. Show the user every object listed in targets/requiredTargets: page, name,
+   shape IDs, group internals, connected edges, and container members.
+   Explain why additional objects are required. Wait for explicit approval
+   of the COMPLETE deletion list. General interest in CRUD is not approval
+   to delete actual user content.
+4. Build new JSON with targets AND approvedTargets equal to the returned
+   requiredTargets, plus the returned previewToken:
+   {"schemaVersion":1,"targets":[{"pageId":0,"visioId":42}],
+    "approvedTargets":[{"pageId":0,"visioId":42}],"previewToken":"<returned hash>"}
+5. Run Delete with that ChangesPath and -ApplyDelete.
+
+The hash is not user consent. Never generate approval fields on the user's
+behalf without their explicit confirmation. Connected shapes/container
+descendants must be explicitly included; no automatic cascade is applied.
+Stale tokens, changed targets/drawings, incomplete approvals, or unsaved
+drawings are rejected. Preview again and seek renewed approval when stale.
+This deletes diagram objects, not local files or Azure resources.
+
+OTHER COMMANDS
+Rename changes a managed ComponentId label across its occurrences, not prose.
+Highlight/ClearHighlight change selected connector weights, retaining colors.
+Export creates a multi-page PDF and PNG per page; overwrite requires the
+explicit -OverwriteExports switch. Exports may reflect current unsaved state.
+Template creates a new native .vstx from a saved drawing; no source replacement.
+Catalog lists legacy builtin icon keys and official catalog records without COM.
+
+MODEL CONTRACT ADDITIONS
+Keep schemaVersion=1 for compatibility.
+presentationProfile is enterprise, reference, or legacy. Enterprise defaults
+cards with icons to icon style and generic functions to label style.
+Pages role=diagram (default) use the presentation gate; role=notes is for
+companion explanations, not a way to exempt the primary architecture.
+Node kinds: card, container, note. The page set is arbitrary, not fixed at five.
+Optional iconRef is a catalog ID and is exclusive with builtin icon.
+cardStyle=icon creates a transparent native anchor, original glyph and caption,
+with no visible service-card box. displayLabel is the short visible caption;
+label retains canonical/source content. iconSize defaults up to 0.72 inches,
+fitting the node. details is retained as Shape Data. cardStyle=label is a
+borderless generic caption, not an invented official product symbol.
+cardStyle=detail adds a native bold first line and left/top body alignment.
+Standard remains the legacy default outside enterprise presentation.
+Card fill/color control the card itself, never the official product glyph.
+containerStyle=boundary gives a thin native scope outline; boundaryType names
+its actual meaning (cloud/tenant/environment/subnet/etc.). Optional subtle fill
+and color apply only to that boundary, not its member icons. Inspect/ExportModel
+retain boundary style/type/fill/color and full scope details.
+SVG artwork is imported through Visio, aspect-fitted, and grouped with a card.
+Optional node/edge sourceRef:string, requirementIds:string[], state:string,
+purpose:string, confidence:High/Medium/Low/Unknown or number 0..1.
+Optional sourceId is the independent source-contract component/relationship ID.
+It is retained by Inspect and ExportModel; it is not an arbitrary explanation
+that can replace a missing source item.
+Confidence describes source interpretation, never architecture certification.
+Edge kinds: peering, traffic, dns, governance, telemetry, logical, ingestion,
+query, dependency, association. Choose accurately, not by visual color alone.
+Optional direction: forward/backward/both/none; dashed:boolean.
+Optional color: RGB(r,g,b) for source connector notation.
+sourcePosition/targetPosition are 0..1 along the selected side: bottom-to-top
+for left/right sides, left-to-right for top/bottom sides. Default 0.5 is unchanged.
+For icon nodes, left/right/top ports follow the visible glyph while remaining
+glued to the full semantic group. Bottom ports stay below the caption to avoid
+cutting a vertical connector through its text.
+Optional edge routeStyle=straight or orthogonal selects the routing grammar.
+Aligned opposite-side icon/label interactions default to straight; other new
+connections and legacy cards retain orthogonal routing. Update and ExportModel
+preserve explicit routing styles. Use straight for radial/direct relationships
+and orthogonal for deliberate shared gutters, not a universal one-size layout.
+Unknown direction cannot be represented as a confident direction. Resolve it
+or deliberately draw and label an uncertain association with evidence retained.
+Optional page footer:string/null/false. furniture:false suppresses default
+title/subtitle/footer/background for faithful native-model roundtripping.
+Optional page titleFontSize controls heading size; container fontSize controls
+its native label. Native arbitrary-format roundtrip limitations still apply.
+Export may emit allowOffPage:true to retain actual off-page native geometry.
+
+NEUTRAL DRAFT ADAPTER
+Import-Draft.ps1 output is NOT this render model. Its source IDs, group
+metadata, binding confidence, unknown directions, and geometry require review.
+Read Architecture-Guide.txt before translating. Never rename a neutral function
+to an Azure service or guess a connector endpoint just to satisfy model validation.
