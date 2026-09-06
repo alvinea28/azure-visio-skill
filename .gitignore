@@ -26,7 +26,3 @@ Sources/
 # Only the curated distributable belongs in source control
 *.zip
 !versions/*/dist/*.zip
-
-# Explicitly approved public architecture samples only
-!versions/v1.6/examples/AVS-Enterprise-Backup.pdf
-!versions/v1.6/examples/AVS-Enterprise-Backup.vsdx
