@@ -22,20 +22,20 @@ Start a **new chat/task** after installation.
 
 [Setup and commands](versions/v1.6/README.txt) | [Editing guide](versions/v1.6/CRUD-Guide.txt)
 
-## Three-page example
+## Latest sample: AVS and enterprise backup
 
-Synthetic RAG assistant generated with v1.6; illustrative, not a deployment or security certification.
+Azure VMware Solution with multi-region active/passive disaster recovery, enterprise landing zones, security, backup, and monitoring.
 
-### 1. Main architecture
+[Sample PDF](versions/v1.6/examples/AVS-Enterprise-Backup.pdf) | [Editable Visio sample](versions/v1.6/examples/AVS-Enterprise-Backup.vsdx)
 
-![Main RAG architecture](versions/v1.6/examples/images/architecture-main.png)
+Both files include all three pages: AVS main architecture, enterprise landing zones, and flow/write-up. Illustrative target design, not a deployed or certified solution.
 
-### 2. Enterprise-hardening proposal
+### Enterprise AVS and backup view (page 2)
 
-![Separately proposed enterprise hardening](versions/v1.6/examples/images/architecture-hardening.png)
+![AVS enterprise landing zones with security, backup, and monitoring](versions/v1.6/examples/images/avs-enterprise-backup.png)
 
-### 3. Main-flow explanation
+### Flow and write-up (page 3)
 
-![Detailed main-flow explanation](versions/v1.6/examples/images/architecture-flow.png)
+![AVS protection, regional failover, recovery, and return flow with explanatory write-up](versions/v1.6/examples/images/avs-flow-writeup.png)
 
 Independent project, not an official Microsoft or GitHub product. Microsoft icons retain their [published terms](https://learn.microsoft.com/en-us/azure/architecture/icons/).
