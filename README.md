@@ -8,9 +8,7 @@ Create editable Azure architecture **Visio + PDF** packs with Scout or Copilot C
 
 ## Use in Cowork
 
-For colleagues, **share the installed skill through Cowork** so each person does not need to download a GitHub ZIP. Administrators can deploy a skills-only plugin to assigned users/groups; see [distribution guidance](versions/v1.7/DISTRIBUTION.txt).
-
-The publisher imports the current package once through **Customize > Skills > Add > Upload skill**, keeping all companions. Start a new task after installation/update.
+The User imports the current package once through **Customize > Skills > Add > Upload skill**, keeping all companions. Start a new task after installation/update.
 
 Cowork completes both files directly with preinstalled **ReportLab and Pillow**, **without a Scout handoff**. Initial host trust/permission approvals still apply; no skill can silently grant them.
 
