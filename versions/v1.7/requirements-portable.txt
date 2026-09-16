@@ -1,0 +1,6 @@
+# Local development only. Cowork uses preinstalled libraries and never runs pip.
+# Python 3.10+; no Microsoft Office, COM, browser, or remote rendering service.
+reportlab>=4.4,<6
+Pillow>=11,<13
+# The explicit legacy SVG test mode needs resvg-py, but it is not a runtime
+# requirement of this release and must not trigger installation in Cowork.

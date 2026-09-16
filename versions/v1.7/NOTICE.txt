@@ -1,0 +1,73 @@
+Microsoft Azure and Microsoft Entra architecture icon resources
+Offline PNG data companions for Azure Visio v1.7
+
+COVERAGE AND PROVENANCE
+All 714 SVG icons in the Azure V24 archive plus one actual Microsoft Entra ID
+core color icon are represented: 715 icons, all usable, no substitutions.
+Microsoft retains rights in its product icons and trademarks.
+
+Azure source and terms: https://learn.microsoft.com/en-us/azure/architecture/icons/
+Azure archive: https://arch-center.azureedge.net/icons/Azure_Public_Service_Icons_V24.zip
+Azure archive SHA256: 921594ccd1bf3d9c0a1bd7b6d924e050551a59342f2b353bb74bdcf761c35141
+
+Entra official source and terms: https://learn.microsoft.com/en-us/entra/architecture/architecture-icons
+Entra archive: https://download.microsoft.com/download/3/1/a/31a56038-856a-4489-88e4-ee5a1c4352be/Microsoft%20Entra%20architecture%20icons%20-%20Oct%202023.zip?wt.mc_id=microsoftentraicons_downloadmicrosoftentraicons_content_cnl_csasci
+Entra archive SHA256: 4e07536706a2d092e6524e5417e2c861333fdbdb41c36f78d44dfa07ccc5eedc
+Selected archive member: Microsoft Entra architecture icons - Oct 2023/Microsoft Entra color icons SVG/Microsoft Entra ID color icon.svg
+Selected original SVG SHA256: efd9f54562bfb78bf3c77aecdd5fc31b61fce8a1cec78c4370b41fc470e54eda
+Stable ID: entra-e5000f379275
+Logical PNG identity: png/entra-e5000f379275.png
+256px PNG SHA256: bfa6eb45b4c2e583025b3f06a3d07e8f263bc76569c01895fdc6289037edeff7
+Packaged terms member: Microsoft Entra architecture icons - Oct 2023/Microsoft Terms of Use.docx
+Packaged terms DOCX SHA256: 704aedbbc3bd98b4c74506513a67ff51de44e2cff58b52f368ebf548ced7788f
+The selected glyph is Microsoft Entra ID, not Identity Protection, Privileged
+Identity Management, Governance, or the Microsoft Entra product-family icon.
+Each catalog entry retains its original source path, SHA256, source page,
+download URL, collection, name, and source viewport aspect.
+
+PERMITTED USE AND LIMITATIONS
+Microsoft permits use of these icons in architectural diagrams, training
+materials, or documentation. Copy, distribute, and display only for those
+permitted uses unless granted explicit permission by Microsoft. Microsoft
+reserves all other rights. The icons are documentation resources, not this
+skill's brand. Do not use Microsoft product icons to represent your own product
+or service. Do not use the Entra icons in marketing communications.
+Do not crop, flip, rotate, recolor, distort, or otherwise change icon shape.
+Use icons to illustrate how products work together; include the product name
+nearby. This companion packaging is not affiliated with, sponsored by, or
+endorsed by Microsoft. No broader trademark or branding rights are granted.
+
+EXACT OFFLINE RASTERIZATION METHOD
+All PNGs were rendered directly from the original, hash-verified SVGs using
+the existing installed resvg_py 0.5.0 svg_to_bytes, skip_system_fonts=True,
+dpi=96, without network access or system-font loading. No original was edited.
+The longest edge is exactly 256 pixels. If original aspect >= 1, width=256 and
+height=round(256/aspect); otherwise width=round(256*aspect) and height=256.
+Only in-memory root width and height are set to those integer pixel dimensions.
+Every original viewBox is unchanged. For the sole SVG without a viewBox
+(azure-9b014206d93a, Foundry Control Plane), original width=18 and height=18
+provide the equivalent full-viewport viewBox "0 0 18 18".
+Default xMidYMid meet is retained: rounding adds transparent padding, not
+distortion or clipping. This matches the earlier vetted sizing method and
+avoids intrinsic-size rounding/clipping and default dpi=0 physical-unit errors.
+Original artwork elements, colors, gradients, shapes, transforms, resources,
+orientation, transparency, and full viewport are preserved.
+There is no cropping, quantization, palette/color reduction, background fill,
+post-render PNG resampling, or post-render PNG re-encoding. Stored PNG bytes
+are exactly the rasterizer output, encoded as standard base64 in ordinary JSON.
+All icons decode as static, nonempty RGBA PNGs; catalog hashes and dimensions
+match payloads; relative canvas/source-aspect error is strictly below 1%.
+At a 0.72-inch longest-edge placement, 256 pixels provides about 355.6 dpi.
+The lower resolution trades large-format enlargement/detail for compact,
+complete offline coverage without runtime SVG dependencies.
+
+COMPANION FORMAT
+catalog.json is the complete 715-record JSON array. Its dataFile values point
+to ordinary Icon-Data-N.json companions with schemaVersion=1,
+kind="azure-visio-png-data", and images mapping IDs to standard base64 PNGs.
+Catalog path values are logical PNG identities, not required on-disk files.
+No nested archives, executable code, dependencies, wheels, native modules,
+original SVGs, or build helpers are included in the deliverable companion files.
+The original archives, SVGs, and prior source terms remain only in the separate
+offline build location. Local verification used Pillow 12.3.0 / ReportLab 4.5.1;
+execution in Microsoft Cowork or ReportLab 5.0.1 is not claimed.

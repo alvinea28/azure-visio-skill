@@ -1,0 +1,29 @@
+{
+    "schemaVersion":  1,
+    "kind":  "azure-visio-offline-png-json",
+    "description":  "Automatically loaded ordinary JSON PNG data; no inner ZIP, network or installation.",
+    "iconCount":  715,
+    "usableIconCount":  715,
+    "source":  [
+                   "https://arch-center.azureedge.net/icons/Azure_Public_Service_Icons_V24.zip",
+                   "https://download.microsoft.com/download/3/1/a/31a56038-856a-4489-88e4-ee5a1c4352be/Microsoft%20Entra%20architecture%20icons%20-%20Oct%202023.zip?wt.mc_id=microsoftentraicons_downloadmicrosoftentraicons_content_cnl_csasci"
+               ],
+    "terms":  [
+                  "https://learn.microsoft.com/en-us/azure/architecture/icons/",
+                  "https://learn.microsoft.com/en-us/entra/architecture/architecture-icons"
+              ],
+    "catalog":  {
+                    "sha256":  "6f98557b29ee4f4de1bb22f750a339b08fb52c1af637b06439d61835a5703250",
+                    "file":  "catalog.json"
+                },
+    "dataFiles":  [
+                      {
+                          "sha256":  "dea295779b9e1cb2014fcabe3ace173f122d3d035554dae6b3679db6c570cd11",
+                          "file":  "Icon-Data-1.json"
+                      },
+                      {
+                          "sha256":  "8b721d16a7b0f9b89112e6d8e45d8c153998c06e28ba8da672c66363fb5296b4",
+                          "file":  "Icon-Data-2.json"
+                      }
+                  ]
+}

@@ -1,0 +1,57 @@
+AZURE VISIO 1.7 - COWORK DISTRIBUTION WITHOUT PER-USER ZIP DOWNLOADS
+
+Runtime automation and installation are different operations. A skill cannot
+install itself before the host has loaded it or silently authorize host actions.
+This release automates its own first-run resource selection/output creation;
+onboarding and permissions remain controlled by Cowork and the organization.
+
+RECOMMENDED: SHARE THE INSTALLED SKILL
+1. The publisher imports azure-visio-1.7.0.zip once using Cowork's documented
+   Customize > Skills > Add dropdown > Upload skill route.
+2. Open that skill's details and select Share > Specific users in your
+   organization > Apply.
+3. Give recipients the Cowork share link. They access the skill through Cowork
+   rather than each manually downloading an archive from GitHub.
+4. After updating the publisher's skill, use Re-share to update recipients.
+An imported skill may take time to synchronize. Start a new task after install
+or update. Availability and any initial trust acknowledgement depend on the host.
+
+AT SCALE: ADMINISTRATOR-DEPLOYED SKILLS-ONLY PLUGIN
+Microsoft supports packages with only agentSkills and no connector. An approved
+publisher/admin can wrap this release's complete skill in that format, validate
+the app manifest, and deploy to selected users/groups through the admin center.
+The documented deployment automatically acquires the plugin for those recipients.
+Simply uploading it to a discoverable catalog is not the same as deploying it.
+
+A valid plugin needs a stable app GUID, publisher-approved developer identity,
+real applicable website/privacy/terms URLs, and owned/authorized app branding.
+Do not invent legal terms, use another vendor's policy, add secrets or fabricate
+organization permissions. This release does not claim to include an upload-ready
+admin plugin or silently deploy one. Once those publisher choices are established,
+use the official skills-only package schema and administrator deployment flow.
+
+WHAT THE RUNTIME NEVER DOES
+- Ask the user for another skill ZIP, icon pack, SVG renderer or catalog location.
+- Download from GitHub, PyPI, icon CDNs, or architecture-reference URLs.
+- Install packages, unpack wheels, modify site-packages, or bypass host gates.
+- Poll for setup confirmation or wait for a continue message.
+
+All Python/text/JSON companions must be provided by the host. A missing companion
+produces a blocked result identifying the filename; it is not a cue to prompt
+for a manual download. A fresh task needs no installation cache from a prior one.
+The permitted Python libraries must already be available.
+
+OFFICIAL MICROSOFT DOCUMENTATION (reviewed September 16, 2026)
+Share/import skills:
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-customize#share-skills-and-plugins
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-customize#upload-a-skill
+Skills-only plugin packaging:
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-plugin-development#skills-only-no-connector
+Automatic recipient deployment:
+https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/cowork-manage-plugins#deploy-plugins-to-your-organization
+
+Companion rules documented separately from archive upload limits: no more than
+20 companions, each <=5 MB, combined <=10 MB, fetched on demand. The package uses
+ordinary JSON data instead of relying on undocumented nested ZIP extraction.
+The host has its own file-download timeouts; a local successful run does not
+establish a particular tenant's synchronization speed or permission rollout.

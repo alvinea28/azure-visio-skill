@@ -1,26 +1,24 @@
 # Azure Visio Skill
 
-Create editable Azure architecture **Visio + PDF** files with Scout or Copilot Cowork. Each v1.6 pack has three pages: **main architecture**, **conditional enterprise hardening/review**, and **detailed main-flow explanation**.
+Create editable Azure architecture **Visio + PDF** packs with Scout or Copilot Cowork: **main architecture**, **enterprise hardening/review**, and **detailed flow explanation**.
 
-**[Download v1.6 ZIP](versions/v1.6/dist/azure-visio-1.6.0.zip)** | [v1.6 files](versions/v1.6/) | [v1.5 archive](versions/v1.5/)
+**Current release: [v1.7.0 skill package](versions/v1.7/dist/azure-visio-1.7.0.zip)** | [Setup](versions/v1.7/README.txt) | [Distribution](versions/v1.7/DISTRIBUTION.txt)
 
-Code, guides, tests, and downloads are grouped by version. Platform comparison screenshots are in [sample output](sample%20output/).
+**Automated first run:** 715 bundled icons, automatic resource discovery and output folders, no additional ZIP/SVG downloads, package installs, or routine setup questions.
 
-## Install
+## Use in Cowork
 
-**Scout:** Requires licensed desktop Visio on Windows. Extract the ZIP, keep its files together, and ask:
+For colleagues, **share the installed skill through Cowork** so each person does not need to download a GitHub ZIP. Administrators can deploy a skills-only plugin to assigned users/groups; see [distribution guidance](versions/v1.7/DISTRIBUTION.txt).
 
-> Install azure-visio from [folder]. Register SKILL.md and all companion files, and complete the official icon setup.
+The publisher imports the current package once through **Customize > Skills > Add > Upload skill**, keeping all companions. Start a new task after installation/update.
 
-**Cowork:** Open **Customize** (sidebar or **+**) > **Skills > Add > Upload skill** and upload the v1.6 ZIP, not GitHub's source archive. Cowork creates the files directly with Python, **without a Scout handoff**. Skill upload, Python/dependencies, and file downloads must be allowed by your organization's rollout and policy.
+Cowork completes both files directly with preinstalled **ReportLab and Pillow**, **without a Scout handoff**. Initial host trust/permission approvals still apply; no skill can silently grant them.
 
-Start a **new chat/task** after installation.
+**Scout:** Register the same complete package for portable new-drawing creation. Existing desktop-Visio editing workflows remain separate.
 
 ## Try it
 
-> Use azure-visio to draw [your requirements]. Deliver the three-page editable Visio and PDF. Use official icons and right-angle connectors. In Cowork, finish here without a Scout handoff.
-
-[Setup and commands](versions/v1.6/README.txt) | [Editing guide](versions/v1.6/CRUD-Guide.txt)
+> Use azure-visio to draw [your requirements]. Deliver the three-page editable Visio and PDF here, using official icons and right-angle connectors.
 
 ## Same requirements, two platforms
 
