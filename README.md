@@ -1,6 +1,6 @@
 # Azure Visio Skill
 
-Turn requirements or sketches into **editable Visio + PDF** with three pages: main architecture, enterprise hardening/review, and flow explanation.
+Turn requirements or sketches into **editable Visio + PDF** with three pages: main page architecture, enterprise hardening/review, and flow explanation.
 
 **[Get v1.7.0](versions/v1.7/dist/azure-visio-1.7.0.zip)** | [Detailed setup](versions/v1.7/README.txt)
 
